@@ -16,10 +16,10 @@ in
     lib.mkMerge [
       (lib.mkIf (config.snowglobe-lib.desktop.enable) {
         programs = {
-          ghidra.enable = lib.mkDefault true;
-          zenmap.enable = lib.mkDefault true;
-          tor-browser.enable = lib.mkDefault true;
-          wireshark.package = lib.mkDefault pkgs.wireshark; # install gui version if desktop is enabled
+          ghidra.enable = slib.setDefault true;
+          zenmap.enable = slib.setDefault true;
+          tor-browser.enable = slib.setDefault true;
+          wireshark.package = slib.setDefault pkgs.wireshark; # install gui version if desktop is enabled
         };
       })
       {
@@ -33,14 +33,14 @@ in
         };
 
         programs = {
-          tcpdump.enable = lib.mkDefault true;
-          metasploit.enable = lib.mkDefault true;
-          lynx.enable = lib.mkDefault true;
-          binsider.enable = lib.mkDefault true;
-          wireshark.enable = lib.mkDefault true;
-          traceroute.enable = lib.mkDefault true;
-          nmap.enable = lib.mkDefault true;
-          john.enable = lib.mkDefault true;
+          tcpdump.enable = slib.setDefault true;
+          metasploit.enable = slib.setDefault true;
+          lynx.enable = slib.setDefault true;
+          binsider.enable = slib.setDefault true;
+          wireshark.enable = slib.setDefault true;
+          traceroute.enable = slib.setDefault true;
+          nmap.enable = slib.setDefault true;
+          john.enable = slib.setDefault true;
         };
 
         environment.systemPackages = builtins.attrValues {
