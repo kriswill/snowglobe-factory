@@ -48,10 +48,6 @@
       }
     )).ceph;
 
-  # bottles depends on python314Packages.patool which fails to build in nixpkgs-unstable
-  # https://github.com/wummel/patool/issues/194
-  bottles = nixpkgs-stable.bottles;
-
   # This causes some programs to display an empty icon entry
   puddletag = prev.puddletag.overrideAttrs (_: {
     postFixup = ''
