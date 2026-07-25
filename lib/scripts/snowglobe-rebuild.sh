@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # wrapper around nixos-rebuild, ensuring configurations are automaically logged and commited to git
 y_or_n() {
 	while true; do

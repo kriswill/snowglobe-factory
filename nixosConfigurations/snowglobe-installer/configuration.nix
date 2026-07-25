@@ -4,11 +4,6 @@
   modulesPath,
   ...
 }:
-let
-  install-sh = pkgs.writeScriptBin "install.sh" (
-    builtins.readFile ../../lib/scripts/snowglobe-install.sh
-  );
-in
 {
   imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
 
@@ -31,16 +26,14 @@ in
 
   users.defaultUserShell = pkgs.zsh;
   environment = {
-    systemPackages = [
-      install-sh
-    ]
-    ++ (builtins.attrValues {
+    systemPackages = builtins.attrValues {
       inherit (pkgs)
+        snowglobe-install
         nixfmt
         sops
         age
         ;
-    });
+    };
 
     etc = {
       # TODO technically etc is not the correct place to put this

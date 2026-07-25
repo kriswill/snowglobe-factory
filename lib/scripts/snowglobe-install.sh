@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 _errormsg() {
 	printf "%s\n" "$1"
 	exit 1
