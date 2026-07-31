@@ -16,41 +16,17 @@
     };
   });
 
-  # ani-cli from unstable cannot download media
-  ani-cli = prev.ani-cli.overrideAttrs (old: {
-    version = "4.14.1";
+  # ani-cli from unstable is old and cannot download media
+  ani-cli = prev.ani-cli.overrideAttrs (old: rec {
+    version = "unstable-07-31-2026";
     src = prev.fetchFromGitHub {
       owner = "pystardust";
       repo = "ani-cli";
-      rev = "5cfc4b0020e9b692b1a7d76d2f5462371c6c184f";
-      hash = "sha256-uEB2RHN0JA8kvFFTeGg0n6JwMcPsccVhI7f1k+bZ5Ls=";
-    };
-  });
-
-  # freetube version bump
-  freetube = prev.freetube.overrideAttrs (old: rec {
-    version = "0.25.1";
-    src = prev.fetchFromGitHub {
-      owner = "FreeTubeApp";
-      repo = "FreeTube";
-      tag = "v${version}-beta";
-      hash = "sha256-CQiwAoOJoAZpcDIwqcOfUAvJHLWTdj8fIInlR3qyjg8=";
+      rev = "38898bad8901106f7c8cabd8db1b7b26c620c32a";
+      hash = "sha256-hhH66/1sq0v0O8mle9mK48dhfapBAGzwvX4HlZ1wFHU=";
     };
 
-    pnpmDeps = prev.fetchPnpmDeps {
-      inherit (old) pname;
-      inherit src version;
-      pnpm = prev.pnpm_10;
-      fetcherVersion = 4;
-      hash = "sha256-NWCgUjBuSeEl65mmAeJzOyIxCi2ha0Nr5qjOQq+CtMQ=";
-    };
-
-    patches = [
-      (prev.replaceVars ./freetube-build-script.patch {
-        electron-version = prev.electron.version;
-      })
-      ./freetube-targets.patch
-    ];
+    runtimeInputs = old.runtimeInputs ++ [ prev.botan3 ];
   });
 
   # ceph doesn't build
@@ -74,6 +50,7 @@
       }
     )).ceph;
 
+  # puddletag's icon is installed to the incorrect location
   # This causes some programs to display an empty icon entry
   puddletag = prev.puddletag.overrideAttrs (_: {
     postFixup = ''
