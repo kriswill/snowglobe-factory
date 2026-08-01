@@ -54,8 +54,6 @@
               inputs.nix-post-build-hook-queue.nixosModules.default
               # project providing cli indexing
               inputs.nix-index-database.nixosModules.default
-              # rolling release of noctaila v5
-              inputs.noctalia.nixosModules.default
             ])
             # secrets storage and key management
             # does not work with import-tree for some reason
@@ -113,11 +111,6 @@
       url = "github:newam/nix-post-build-hook-queue";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt.follows = "";
-    };
-
-    noctalia = {
-      url = "github:noctalia-dev/noctalia";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     sops-nix = {

@@ -111,6 +111,14 @@ in
       age.keyFile = slib.setDefault "/root/.config/sops/age/keys.txt";
     };
 
+    # link /root/.ssh keyfiles to /etc/ssh
+    systemd.tmpfiles.rules = [
+      "L /root/.ssh/id_ed25519 - - - - /etc/ssh/ssh_host_ed25519_key"
+      "L /root/.ssh/id_ed25519.pub - - - - /etc/ssh/ssh_host_ed25519_key.pub"
+      "L /root/.ssh/id_rsa - - - - /etc/ssh/ssh_host_rsa_key"
+      "L /root/.ssh/id_rsa.pub - - - - /etc/ssh/ssh_host_rsa_key.pub"
+    ];
+
     environment = {
       # use dash as /bin/sh of choice
       # override weights are hardcoded into nixpkgs using lib.mkDefault

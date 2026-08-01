@@ -16,15 +16,17 @@
     };
   });
 
-  # ani-cli from unstable cannot download media
-  ani-cli = prev.ani-cli.overrideAttrs (old: {
-    version = "4.14.1";
+  # ani-cli from unstable is old and cannot download media
+  ani-cli = prev.ani-cli.overrideAttrs (old: rec {
+    version = "unstable-07-31-2026";
     src = prev.fetchFromGitHub {
       owner = "pystardust";
       repo = "ani-cli";
-      rev = "5cfc4b0020e9b692b1a7d76d2f5462371c6c184f";
-      hash = "sha256-uEB2RHN0JA8kvFFTeGg0n6JwMcPsccVhI7f1k+bZ5Ls=";
+      rev = "38898bad8901106f7c8cabd8db1b7b26c620c32a";
+      hash = "sha256-hhH66/1sq0v0O8mle9mK48dhfapBAGzwvX4HlZ1wFHU=";
     };
+
+    runtimeInputs = old.runtimeInputs ++ [ prev.botan3 ];
   });
 
   # ceph doesn't build
@@ -48,10 +50,7 @@
       }
     )).ceph;
 
-  # bottles depends on python314Packages.patool which fails to build in nixpkgs-unstable
-  # https://github.com/wummel/patool/issues/194
-  bottles = nixpkgs-stable.bottles;
-
+  # puddletag's icon is installed to the incorrect location
   # This causes some programs to display an empty icon entry
   puddletag = prev.puddletag.overrideAttrs (_: {
     postFixup = ''

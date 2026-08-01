@@ -354,7 +354,7 @@ while :; do
 			# update your flake input to the current local repo state
 			cp flake.nix flake.nix.bak || _errormsg "Could not archive the current state of flake.nix"
 			cp flake.lock flake.lock.bak || _errormsg "Could not archive the current state of flake.lock"
-			sed -i "s|.*url =.*/earthgman/snowglobe-lib.*|url = \"$PROJECT_ROOT\";|" "flake.nix" || {
+			sed -i "s|url =.*/earthgman/snowglobe-lib.*|url = \"$PROJECT_ROOT\";|" "flake.nix" || {
 				_restore_flake
 				_notify "Warning" "Failed to replace the snowglobe-lib input url of $GLOBE_DIR with this local repository via sed. skipping this repo."
 				continue
