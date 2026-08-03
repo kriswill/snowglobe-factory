@@ -7,7 +7,7 @@
   # ran into this: https://github.com/j-evins/glabels-qt/issues/256
   # the current nixpkgs version is very old for some reason.
   glabels-qt = prev.glabels-qt.overrideAttrs (old: {
-    version = "3.99-master638";
+    version = "unstable-2026-05-24";
     src = prev.fetchFromGitHub {
       owner = "j-evins";
       repo = "glabels-qt";
@@ -17,7 +17,7 @@
   });
 
   # ani-cli from unstable is old and cannot download media
-  ani-cli = prev.ani-cli.overrideAttrs (old: rec {
+  ani-cli = prev.ani-cli.overrideAttrs (old: {
     version = "unstable-07-31-2026";
     src = prev.fetchFromGitHub {
       owner = "pystardust";
