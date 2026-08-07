@@ -3,7 +3,8 @@ x 2026-07-20 2026-07-16 Update flake.lock +snowglobe-lib @EarthGman due:2026-07-
 x 2026-07-24 2026-07-20 Update flake.lock +snowglobe-lib @EarthGman due:2026-07-27 rec:1w
 x 2026-07-24 2026-07-24 Update flake.lock +snowglobe-lib @EarthGman due:2026-07-31 rec:1w
 x 2026-07-31 2026-07-24 Update flake.lock +snowglobe-lib @EarthGman due:2026-07-31 rec:1w
-2026-07-31 Update flake.lock +snowglobe-lib @EarthGman due:2026-08-07 rec:1w
+x 2026-08-07 2026-07-31 Update flake.lock +snowglobe-lib @EarthGman due:2026-08-07 rec:1w
+2026-08-07 Update flake.lock +snowglobe-lib @EarthGman due:2026-08-14 rec:1w
 2026-07-12 Check glabels-qt PR then remove overlay once merged +snowglobe-lib @EarthGman
 2026-07-12 check star-pixel-icons PR. Remove star-pixel-icons package when merged
 2026-07-12 check if its ok to use variables in installPhase
@@ -14,4 +15,5 @@ x 2026-07-24 2026-07-20 Edit package patches when updating flake.lock +snowglobe
 x 2026-07-31 2026-07-24 Edit package patches when updating flake.lock +snowglobe-lib @EarthGman due:2026-07-31 rec:1w
 x 2026-07-31 2026-07-31 Edit package patches when updating flake.lock +snowglobe-lib @EarthGman due:2026-08-07 rec:1w
 x 2026-07-31 2026-07-31 Edit package patches when updating flake.lock +snowglobe-lib @EarthGman due:2026-08-07 rec:1w
-2026-07-31 Edit package patches when updating flake.lock +snowglobe-lib @EarthGman due:2026-08-07 rec:1w
+x 2026-08-07 2026-07-31 Edit package patches when updating flake.lock +snowglobe-lib @EarthGman due:2026-08-07 rec:1w
+2026-08-07 Edit package patches when updating flake.lock +snowglobe-lib @EarthGman due:2026-08-14 rec:1w

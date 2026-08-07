@@ -16,19 +16,6 @@
     };
   });
 
-  # ani-cli from unstable is old and cannot download media
-  ani-cli = prev.ani-cli.overrideAttrs (old: {
-    version = "unstable-07-31-2026";
-    src = prev.fetchFromGitHub {
-      owner = "pystardust";
-      repo = "ani-cli";
-      rev = "38898bad8901106f7c8cabd8db1b7b26c620c32a";
-      hash = "sha256-hhH66/1sq0v0O8mle9mK48dhfapBAGzwvX4HlZ1wFHU=";
-    };
-
-    runtimeInputs = old.runtimeInputs ++ [ prev.botan3 ];
-  });
-
   # ceph doesn't build
   # https://github.com/NixOS/nixpkgs/issues/542206
   ceph =
