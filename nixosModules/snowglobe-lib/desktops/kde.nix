@@ -31,7 +31,6 @@ in
       system.hasDesktop = lib.mkForce true;
       desktop = {
         enable = true;
-        installWaylandDeps = false;
       };
     };
 

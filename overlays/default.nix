@@ -4,11 +4,11 @@ let
 in
 rec {
   snowglobe-pkgs =
-    # custom packages
     final: prev:
     let
       system = prev.stdenv.hostPlatform.system;
     in
+    # custom packages
     import ../packages {
       pkgs = final;
       inherit flake;

@@ -54,8 +54,6 @@
               inputs.nix-post-build-hook-queue.nixosModules.default
               # project providing cli indexing
               inputs.nix-index-database.nixosModules.default
-              # lix
-              inputs.lix-module.nixosModules.default
               # provides many rolling release packages
               inputs.chaotic.nixosModules.default
             ])

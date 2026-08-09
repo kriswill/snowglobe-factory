@@ -37,16 +37,16 @@ lib.mkMerge [
 
   extraModules
 
-  # sanity checks
-  (lib.mkIf (!programcfg.installGlobally && programcfg.installForUsers == [ ]) {
+  {
+    # sanity checks
     assertions = [
       {
-        assertion = false;
+        assertion = (programcfg.installGlobally || programcfg.installForUsers != [ ]);
         message = ''
           programs.${programName} is enabled but neither has installGlobally nor installForUsers set. 
           You must set one of the options.
         '';
       }
     ];
-  })
+  }
 ]

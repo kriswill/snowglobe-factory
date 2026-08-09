@@ -24,7 +24,6 @@ in
       snowglobe-rebuild
       nix-formatter
       pkgs.openssh
-      pkgs.nixos-rebuild
       pkgs.gnupg
       pkgs.fzf
       pkgs.git
