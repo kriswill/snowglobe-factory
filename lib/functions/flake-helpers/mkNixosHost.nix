@@ -58,7 +58,7 @@ lib.nixosSystem {
             assertion = (
               nixImplementation == "nix" || nixImplementation == "lix" || nixImplementation == "lix-main"
             );
-            message = "slib.mkNixosHost: nixImplementation must be one of 'nix' or 'lix'";
+            message = "slib.mkNixosHost: nixImplementation must be one of 'nix', 'lix', or 'lix-main'";
           }
         ];
       }

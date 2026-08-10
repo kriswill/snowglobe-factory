@@ -106,7 +106,7 @@ in
           # frontend to manage dconf
           dconf-editor.enable = slib.setDefault config.programs.dconf.enable;
           # web browser
-          helium.enable = slib.setDefault true;
+          mullvad-browser.enable = slib.setDefault true;
           # file manager
           nautilus.enable = slib.setDefault true;
           # media player
