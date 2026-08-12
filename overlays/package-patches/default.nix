@@ -16,6 +16,31 @@
     };
   });
 
+  freetube = prev.freetube.overrideAttrs (old: rec {
+    version = "0.25.2-beta";
+    src = prev.fetchFromGitHub {
+      owner = "FreeTubeApp";
+      repo = "Freetube";
+      tag = "v0.25.2-beta";
+      hash = "sha256-A25I64GP4FRyP21W5QuVvrWpThyU7hDosO25vkIx0UY=";
+    };
+
+    patches = [
+      (prev.replaceVars ./freetube-build-script.patch {
+        electron-version = prev.electron.version;
+      })
+      ./freetube-targets.patch
+    ];
+
+    pnpmDeps = prev.fetchPnpmDeps {
+      inherit (old) pname;
+      inherit version src;
+      pnpm = prev.pnpm_10;
+      fetcherVersion = 4;
+      hash = "sha256-1OnmJi4xCxMALAac4jnLOKg5N/t3pcHgM0AgvF1+DpM=";
+    };
+  });
+
   # ceph doesn't build
   # https://github.com/NixOS/nixpkgs/issues/542206
   ceph =
