@@ -119,8 +119,6 @@ in
       nwg-look.enable = slib.overrideDefault false;
       # disable selectdefault application
       selectdefaultapplication.enable = slib.overrideDefault false;
-      # good GUI based password manager
-      qtpass.enable = slib.setDefault true;
     };
   };
 }
