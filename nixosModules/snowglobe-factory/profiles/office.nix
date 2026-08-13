@@ -5,17 +5,17 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.profiles.office;
+  cfg = config.snowglobe-factory.profiles.office;
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.profiles.office = {
+  options.snowglobe-factory.profiles.office = {
     enable = lib.mkEnableOption "tools and programs typically found in an office setting";
   };
 
   config = lib.mkIf cfg.enable {
     # enable a working local print server by default
-    snowglobe-lib.cups.enable = slib.setDefault true;
+    snowglobe-factory.cups.enable = slib.setDefault true;
 
     programs = {
       # email client

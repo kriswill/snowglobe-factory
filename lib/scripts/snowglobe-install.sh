@@ -771,23 +771,23 @@ if [ -z "$APPEND_MODE" ]; then
 			description = \"my NixOS configurations\";
 
 			inputs = {
-				snowglobe-lib = {
-					url = \"git+https://codeberg.org/earthgman/snowglobe-lib\";
+				snowglobe-factory = {
+					url = \"git+https://codeberg.org/earthgman/snowglobe-factory\";
 					# Be sure to also uncomment this if you use your own nixpkgs input to avoid duplicate nixpkgs repos in the store.
 					# inputs.nixpkgs.follows = \"nixpkgs\";
 				};
 
-				nixpkgs.follows = \"snowglobe-lib/nixpkgs\";
+				nixpkgs.follows = \"snowglobe-factory/nixpkgs\";
 				# comment above and uncomment below to pin your own nixpkgs revision in the flake.lock.
 				# Could cause instabilities, use at your own risk.
 				# nixpkgs = {
 				#   url = \"github:NixOS/nixpkgs/nixos-unstable\";
 				# };
 
-				import-tree.follows = \"snowglobe-lib/import-tree\";
+				import-tree.follows = \"snowglobe-factory/import-tree\";
 			};
 
-			outputs = { self, nixpkgs, snowglobe-lib, ... }:
+			outputs = { self, nixpkgs, snowglobe-factory, ... }:
 			let
 				flake = self;
 				lib = nixpkgs.lib;
@@ -897,7 +897,7 @@ if [ -z "$APPEND_MODE" ]; then
 				pkgs = final;
 			};
 
-			snowglobe-pkgs = inputs.snowglobe-lib.overlays.default;
+			snowglobe-pkgs = inputs.snowglobe-factory.overlays.default;
 
 			# examples for installing rolling release of some popular projects.
 			# of course, you will need to add the input to your flake for them to work.
@@ -1079,13 +1079,13 @@ if [ ${TIMEZONE+x} ]; then
 fi
 
 if [ ${SELECTED_DESKTOP+x} ]; then
-	printf "snowglobe-lib.desktop.%s.enable = true;\n" "$SELECTED_DESKTOP" >>"$CONFIGURATION_NIX"
+	printf "snowglobe-factory.desktop.%s.enable = true;\n" "$SELECTED_DESKTOP" >>"$CONFIGURATION_NIX"
 fi
 
 if [ "$ENABLED_PROFILES" ]; then
 	printf "\n# custom profiles\n" >>"$CONFIGURATION_NIX"
 	for profile in "${ENABLED_PROFILES[@]}"; do
-		printf "snowglobe-lib.profiles.%s.enable = true;\n" "$profile" >>"$CONFIGURATION_NIX"
+		printf "snowglobe-factory.profiles.%s.enable = true;\n" "$profile" >>"$CONFIGURATION_NIX"
 	done
 fi
 
@@ -1107,7 +1107,7 @@ let
 	inputs = flake.inputs;
 	outputs = flake.outputs;
 	lib = inputs.nixpkgs.lib;
-	slib = inputs.snowglobe-lib.lib;
+	slib = inputs.snowglobe-factory.lib;
 in
 	{\n" >"$HOSTS_CONFIG_FILE"
 fi

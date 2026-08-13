@@ -6,11 +6,11 @@
 }:
 let
   module-name = "qemu";
-  cfg = config.snowglobe-lib.${module-name};
+  cfg = config.snowglobe-factory.${module-name};
   slib = import ../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.${module-name} = {
+  options.snowglobe-factory.${module-name} = {
     enable = lib.mkEnableOption "OOB configuration for qemu running under libvirtd for use with virt-manager.";
   };
 
@@ -21,7 +21,7 @@ in
         environment.systemPackages = [ pkgs.dnsmasq ];
         boot.kernelModules =
           let
-            cpu-vendor = config.snowglobe-lib.system.cpu-vendor;
+            cpu-vendor = config.snowglobe-factory.system.cpu-vendor;
           in
           lib.mkIf (cpu-vendor != null) [ "kvm-${cpu-vendor}" ];
 
@@ -39,7 +39,7 @@ in
           };
         };
       }
-      (lib.mkIf (config.snowglobe-lib.desktop.enable) {
+      (lib.mkIf (config.snowglobe-factory.desktop.enable) {
         programs.virt-manager.enable = slib.setDefault true;
       })
     ]

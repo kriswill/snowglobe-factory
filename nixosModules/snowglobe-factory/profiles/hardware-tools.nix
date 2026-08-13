@@ -5,11 +5,11 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.profiles.hardware-tools;
+  cfg = config.snowglobe-factory.profiles.hardware-tools;
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.profiles.hardware-tools.enable =
+  options.snowglobe-factory.profiles.hardware-tools.enable =
     lib.mkEnableOption "hardware diagnostic tools";
   config = lib.mkIf cfg.enable (
     lib.mkMerge [

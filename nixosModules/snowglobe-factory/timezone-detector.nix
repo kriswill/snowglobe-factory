@@ -5,11 +5,11 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.timezone-detector;
+  cfg = config.snowglobe-factory.timezone-detector;
   cfgs = config.services;
 in
 {
-  options.snowglobe-lib.timezone-detector = {
+  options.snowglobe-factory.timezone-detector = {
     enable = lib.mkEnableOption "Module to automatically detect and set the timezone based on your geolocation. Uses services.tzupdate.";
     dispatcherTimeout = lib.mkOption {
       description = "time in seconds that tzupdate should spend querying the api servers from the networkmanager dispatcher script before giving up.";

@@ -4,7 +4,7 @@ let
   stdenv = pkgs.stdenv;
   system = stdenv.hostPlatform.system;
   snowglobe-rebuild = flake.outputs.packages.${system}.snowglobe-rebuild;
-  ci-sh = pkgs.runCommandLocal "snowglobe-lib-ci" { } ''
+  ci-sh = pkgs.runCommandLocal "snowglobe-factory-ci" { } ''
     mkdir -p $out/bin
     cp ${flake + "/lib/scripts/ci.sh"} $out/bin/ci.sh
   '';

@@ -5,14 +5,14 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.desktop;
+  cfg = config.snowglobe-factory.desktop;
   cfgs = config.services;
   cfgp = config.programs;
   slib = import ../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.desktop = {
-    enable = lib.mkEnableOption "Snowglobe-Lib's modules for systems with a desktop environment";
+  options.snowglobe-factory.desktop = {
+    enable = lib.mkEnableOption "snowglobe-factory's modules for systems with a desktop environment";
     installWaylandDeps = lib.mkEnableOption "wayland tools for desktop.";
   };
 

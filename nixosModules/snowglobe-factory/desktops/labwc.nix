@@ -5,15 +5,15 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.desktop.labwc;
+  cfg = config.snowglobe-factory.desktop.labwc;
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.desktop.labwc.enable = lib.mkEnableOption "Snowglobe-Lib's labwc module";
+  options.snowglobe-factory.desktop.labwc.enable = lib.mkEnableOption "snowglobe-factory's labwc module";
 
   config = lib.mkIf cfg.enable {
-    snowglobe-lib.system.hasDesktop = lib.mkForce true;
-    snowglobe-lib.desktop = {
+    snowglobe-factory.system.hasDesktop = lib.mkForce true;
+    snowglobe-factory.desktop = {
       enable = lib.mkForce true;
       installWaylandDeps = true;
     };

@@ -8,11 +8,11 @@
 }:
 let
   slib = import ../../lib/functions/module-wrappers { inherit lib; };
-  cfg = config.snowglobe-lib.cups;
+  cfg = config.snowglobe-factory.cups;
 in
 {
-  options.snowglobe-lib.cups = {
-    enable = lib.mkEnableOption "snowglobe-lib's cups printing configuration.";
+  options.snowglobe-factory.cups = {
+    enable = lib.mkEnableOption "snowglobe-factory's cups printing configuration.";
     installCommonDrivers = lib.mkOption {
       description = "Whether to install drivers for common printer models (open source drivers only)";
       type = lib.types.bool;

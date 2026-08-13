@@ -6,9 +6,9 @@
   ...
 }:
 {
-  options.snowglobe-lib.headless-debloater.enable = lib.mkEnableOption "Snowglobe-Lib's nixos debloater for headless systems";
+  options.snowglobe-factory.headless-debloater.enable = lib.mkEnableOption "snowglobe-factory's nixos debloater for headless systems";
 
-  config = lib.mkIf config.snowglobe-lib.headless-debloater.enable {
+  config = lib.mkIf config.snowglobe-factory.headless-debloater.enable {
     # disables linux firmware by default since most servers or headless machines, especially vms, dont need firmware from it.
     hardware.enableRedistributableFirmware = lib.mkOverride 899 false;
 

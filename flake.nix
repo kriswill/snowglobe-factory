@@ -42,10 +42,10 @@
       nixosConfigurations = import ./nixosConfigurations { inherit flake; };
 
       nixosModules = rec {
-        snowglobe-lib = {
+        snowglobe-factory = {
           imports = [
             (import-tree [
-              ./nixosModules/snowglobe-lib
+              ./nixosModules/snowglobe-factory
               { nixpkgs.overlays = builtins.attrValues outputs.overlays; }
               outputs.nixosModules.nixos
               # improved disk partition management
@@ -68,7 +68,7 @@
         jovian = import ./nixosModules/jovian { inherit flake; };
         # expose the modules from nixos-hardware because they do not wrap them with options for some reason
         nixos-hardware = inputs.nixos-hardware.nixosModules;
-        default = snowglobe-lib;
+        default = snowglobe-factory;
       };
     };
 
