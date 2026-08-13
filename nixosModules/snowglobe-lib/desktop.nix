@@ -97,6 +97,7 @@ in
         };
 
         programs = {
+          helium.enable = slib.setDefault true;
           # control applet for networkmanager
           networkmanagerapplet.enable = slib.setDefault true;
           # notification daemon api
@@ -105,8 +106,6 @@ in
           dconf.enable = slib.setDefault true;
           # frontend to manage dconf
           dconf-editor.enable = slib.setDefault config.programs.dconf.enable;
-          # web browser
-          helium.enable = slib.setDefault true;
           # file manager
           nautilus.enable = slib.setDefault true;
           # media player
@@ -119,6 +118,10 @@ in
           pwvucontrol.enable = slib.setDefault (cfgs.pipewire.enable && cfgs.pipewire.pulse.enable);
           # calculator app
           gnome-calculator.enable = slib.setDefault true;
+          # graphical udisks partition manager
+          gnome-disks.enable = slib.setDefault true;
+          # hardware info / device manager clone for linux
+          hardinfo2.enable = slib.setDefault true;
           # secrets daemon frontend for gnome-keyring
           seahorse.enable = slib.setDefault config.services.gnome.gnome-keyring.enable;
           # low battery notifier for laptops

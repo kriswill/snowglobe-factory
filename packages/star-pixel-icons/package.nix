@@ -25,7 +25,6 @@ stdenvNoCC.mkDerivation {
   propagatedBuildInputs = [
     hicolor-icon-theme
     adwaita-icon-theme
-    gnome-icon-theme
     kdePackages.breeze-icons
     kdePackages.oxygen-icons
   ];

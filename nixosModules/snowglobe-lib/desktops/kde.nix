@@ -31,7 +31,6 @@ in
       system.hasDesktop = lib.mkForce true;
       desktop = {
         enable = true;
-        installWaylandDeps = false;
       };
     };
 
@@ -109,7 +108,9 @@ in
       batsignal.enable = slib.overrideDefault false;
       # kde has its own notepad
       mousepad.enable = slib.overrideDefault false;
-      # use discover instead of gnome-software
+      # disable gnome-disks in favor of kde-partition-manager
+      gnome-disks.enable = slib.overrideDefault false;
+      partition-manager.enable = slib.setDefault true;
       # use dolphin instead of nautilus
       nautilus.enable = slib.overrideDefault false;
       # prevent 2 network manager applets
@@ -118,6 +119,8 @@ in
       nwg-look.enable = slib.overrideDefault false;
       # disable selectdefault application
       selectdefaultapplication.enable = slib.overrideDefault false;
+      # good GUI based password manager
+      qtpass.enable = slib.setDefault true;
     };
   };
 }

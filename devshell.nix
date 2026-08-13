@@ -24,11 +24,9 @@ in
       snowglobe-rebuild
       nix-formatter
       pkgs.openssh
-      pkgs.nixos-rebuild
       pkgs.gnupg
       pkgs.fzf
       pkgs.git
-      pkgs.lix
       pkgs.nix-output-monitor
       pkgs.libnotify
       pkgs.nvd

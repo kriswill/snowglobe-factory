@@ -52,10 +52,6 @@ in
     };
 
     nix = {
-      # improved nix daemon
-      package = slib.setDefault pkgs.lix;
-      # prefer to use flakes as channels are basically deprecated at this point
-      channel.enable = slib.setDefault false;
       settings = {
         # allow fallbacks if a substituter is down
         fallback = slib.setDefault true;
