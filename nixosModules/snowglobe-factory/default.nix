@@ -51,6 +51,9 @@ in
       };
     };
 
+    # disable choatic nyx cache by default
+    chaotic.nyx.cache.enable = slib.setDefault false;
+
     nix = {
       settings = {
         # allow fallbacks if a substituter is down
