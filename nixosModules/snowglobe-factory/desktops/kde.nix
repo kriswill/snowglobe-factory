@@ -6,28 +6,28 @@
 }:
 let
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
-  cfg = config.snowglobe-lib.desktop.kde;
+  cfg = config.snowglobe-factory.desktop.kde;
 in
 {
-  options.snowglobe-lib.desktop.kde.enable = lib.mkEnableOption "Snowglobe-Lib's KDE plasma module";
+  options.snowglobe-factory.desktop.kde.enable = lib.mkEnableOption "snowglobe-factory's KDE plasma module";
 
   config = lib.mkIf cfg.enable {
     # ensure KDE cannot be enabled with DIY desktops, too many things will break due to KDE's invasiveness
     assertions =
       lib.mkIf
         (
-          config.snowglobe-lib.desktop.niri.enable
-          || config.snowglobe-lib.desktop.hyprland.enable
-          || config.snowglobe-lib.desktop.labwc.enable
+          config.snowglobe-factory.desktop.niri.enable
+          || config.snowglobe-factory.desktop.hyprland.enable
+          || config.snowglobe-factory.desktop.labwc.enable
         )
         [
           {
             assertion = false;
-            message = "You cannot use other snowglobe-lib.desktop modules in conjuction with KDE.";
+            message = "You cannot use other snowglobe-factory.desktop modules in conjuction with KDE.";
           }
         ];
 
-    snowglobe-lib = {
+    snowglobe-factory = {
       system.hasDesktop = lib.mkForce true;
       desktop = {
         enable = true;

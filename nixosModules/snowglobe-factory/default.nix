@@ -8,15 +8,15 @@ let
   slib = import ../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.enable = lib.mkEnableOption "Snowglobe-Lib's default NixOS configuration";
+  options.snowglobe-factory.enable = lib.mkEnableOption "snowglobe-factory's default NixOS configuration";
 
-  config = lib.mkIf config.snowglobe-lib.enable {
+  config = lib.mkIf config.snowglobe-factory.enable {
     # custom patches and configs
     # -----------------------------
-    snowglobe-lib =
+    snowglobe-factory =
       let
-        hasDesktop = (config.snowglobe-lib.system.hasDesktop);
-        gpu-vendors = config.snowglobe-lib.system.gpu-vendors;
+        hasDesktop = (config.snowglobe-factory.system.hasDesktop);
+        gpu-vendors = config.snowglobe-factory.system.gpu-vendors;
         hasElem = builtins.elem;
       in
       {
@@ -77,7 +77,7 @@ in
     documentation.nixos.enable = slib.setDefault false;
 
     # enable the linux-firmware repository if not in a virtual machine
-    hardware.enableRedistributableFirmware = slib.setDefault (!config.snowglobe-lib.system.isVM);
+    hardware.enableRedistributableFirmware = slib.setDefault (!config.snowglobe-factory.system.isVM);
 
     networking = {
       # use networkmanager for connections

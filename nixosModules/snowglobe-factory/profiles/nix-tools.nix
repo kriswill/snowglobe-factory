@@ -5,11 +5,11 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.profiles.nix-tools;
+  cfg = config.snowglobe-factory.profiles.nix-tools;
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.profiles.nix-tools = {
+  options.snowglobe-factory.profiles.nix-tools = {
     enable = lib.mkEnableOption "tools for development with nix";
   };
 

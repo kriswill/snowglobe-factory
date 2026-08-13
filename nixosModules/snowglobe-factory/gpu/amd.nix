@@ -6,10 +6,10 @@
 }:
 let
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
-  cfg = config.snowglobe-lib.gpu.amd;
+  cfg = config.snowglobe-factory.gpu.amd;
 in
 {
-  options.snowglobe-lib.gpu.amd.enable = lib.mkEnableOption "Snowglobe-Lib's amdgpu configuration";
+  options.snowglobe-factory.gpu.amd.enable = lib.mkEnableOption "snowglobe-factory's amdgpu configuration";
   config = lib.mkIf cfg.enable {
     services = {
       xserver.videoDrivers = [ "amdgpu" ];

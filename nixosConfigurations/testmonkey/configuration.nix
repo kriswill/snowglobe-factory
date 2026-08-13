@@ -30,7 +30,7 @@ in
     desktopSession = "niri";
   };
 
-  snowglobe-lib = {
+  snowglobe-factory = {
     gpu = {
       amd.enable = mkForce true;
       intel.enable = mkForce true;

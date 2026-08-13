@@ -6,12 +6,12 @@
 }:
 let
   slib = import ../../lib/functions/module-wrappers { inherit lib; };
-  isUEFI = (config.snowglobe-lib.system.firmware == "UEFI");
+  isUEFI = (config.snowglobe-factory.system.firmware == "UEFI");
 in
 {
-  options.snowglobe-lib.boot-config.enable = lib.mkEnableOption "Snowglobe-Lib's grub configuration";
+  options.snowglobe-factory.boot-config.enable = lib.mkEnableOption "snowglobe-factory's grub configuration";
 
-  config = lib.mkIf config.snowglobe-lib.boot-config.enable {
+  config = lib.mkIf config.snowglobe-factory.boot-config.enable {
     boot = {
       loader = {
         # give the user more time to select configurations for slower monitors

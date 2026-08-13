@@ -1,7 +1,7 @@
 # create some additional system options that can be populated by lib.mkNixosHost
 { lib, ... }:
 {
-  options.snowglobe-lib.system = {
+  options.snowglobe-factory.system = {
     cpu-vendor = lib.mkOption {
       description = "Vendor of your cpu. (used for microcode updates and specific kernel modules)";
       type = lib.types.nullOr (

@@ -7,17 +7,17 @@
 }:
 let
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
-  cfg = config.snowglobe-lib.desktop.niri;
+  cfg = config.snowglobe-factory.desktop.niri;
 in
 {
-  options.snowglobe-lib.desktop.niri = {
-    enable = lib.mkEnableOption "Snowglobe-Lib's niri configuration.";
+  options.snowglobe-factory.desktop.niri = {
+    enable = lib.mkEnableOption "snowglobe-factory's niri configuration.";
   };
 
   config = lib.mkIf cfg.enable {
-    snowglobe-lib.system.hasDesktop = lib.mkForce true;
+    snowglobe-factory.system.hasDesktop = lib.mkForce true;
     # shared desktop configuration
-    snowglobe-lib.desktop = {
+    snowglobe-factory.desktop = {
       enable = true;
       installWaylandDeps = true;
     };

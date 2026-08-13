@@ -5,15 +5,15 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.desktop.hyprland;
+  cfg = config.snowglobe-factory.desktop.hyprland;
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.desktop.hyprland.enable =
+  options.snowglobe-factory.desktop.hyprland.enable =
     lib.mkEnableOption "Snowglobe-lib's default hyprland configuration";
 
   config = lib.mkIf cfg.enable {
-    snowglobe-lib = {
+    snowglobe-factory = {
       system.hasDesktop = lib.mkForce true;
       desktop = {
         enable = true;

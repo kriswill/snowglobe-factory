@@ -33,7 +33,7 @@ lib.nixosSystem {
     [ outputs.nixosModules.default ]
     ++ [
       {
-        snowglobe-lib.enable = slib.setDefault true;
+        snowglobe-factory.enable = slib.setDefault true;
         nixpkgs.hostPlatform = system;
 
         # set secrets file
@@ -44,7 +44,7 @@ lib.nixosSystem {
           inherit stateVersion;
         };
         networking.hostName = hostname;
-        snowglobe-lib.system = {
+        snowglobe-factory.system = {
           inherit
             cpu-vendor
             gpu-vendors

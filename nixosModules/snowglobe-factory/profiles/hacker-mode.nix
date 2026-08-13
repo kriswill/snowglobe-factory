@@ -6,15 +6,15 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.profiles.hacker-mode;
+  cfg = config.snowglobe-factory.profiles.hacker-mode;
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.profiles.hacker-mode.enable =
-    lib.mkEnableOption "Snowglobe-Lib's cybersecurity suite. Installs a majority of tools present on Kali.";
+  options.snowglobe-factory.profiles.hacker-mode.enable =
+    lib.mkEnableOption "snowglobe-factory's cybersecurity suite. Installs a majority of tools present on Kali.";
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
-      (lib.mkIf (config.snowglobe-lib.desktop.enable) {
+      (lib.mkIf (config.snowglobe-factory.desktop.enable) {
         programs = {
           ghidra.enable = slib.setDefault true;
           zenmap.enable = slib.setDefault true;

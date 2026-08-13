@@ -48,7 +48,7 @@ _notify() {
 	fi
 
 	if [ ! ${DISABLE_NOTIFICATIONS+x} ]; then
-		notify-send -a "snowglobe-lib-CI" "$STATUS" "$MSG" || _warnmsg "Failed to send desktop notification with content: $MSG"
+		notify-send -a "snowglobe-factory-CI" "$STATUS" "$MSG" || _warnmsg "Failed to send desktop notification with content: $MSG"
 	fi
 
 	case $STATUS in
@@ -259,7 +259,7 @@ while :; do
 		$EDITOR "ci/globes.txt"
 		;;
 
-	# allows you to locally test your own repository against the current snowglobe-lib state
+	# allows you to locally test your own repository against the current snowglobe-factory state
 	# to upload things, nix-post-build-queue to be installed and configured to upload build artifacts to your remote server
 	"build globes")
 		GLOBES_DIR="$CI_ROOT/globes"
@@ -354,13 +354,13 @@ while :; do
 			# update your flake input to the current local repo state
 			cp flake.nix flake.nix.bak || _errormsg "Could not archive the current state of flake.nix"
 			cp flake.lock flake.lock.bak || _errormsg "Could not archive the current state of flake.lock"
-			sed -i "s|url =.*/earthgman/snowglobe-lib.*|url = \"$PROJECT_ROOT\";|" "flake.nix" || {
+			sed -i "s|url =.*/earthgman/snowglobe-factory.*|url = \"$PROJECT_ROOT\";|" "flake.nix" || {
 				_restore_flake
-				_notify "Warning" "Failed to replace the snowglobe-lib input url of $GLOBE_DIR with this local repository via sed. skipping this repo."
+				_notify "Warning" "Failed to replace the snowglobe-factory input url of $GLOBE_DIR with this local repository via sed. skipping this repo."
 				continue
 			}
 
-			nix flake update snowglobe-lib || {
+			nix flake update snowglobe-factory || {
 				_restore_flake
 				_notify "Warning" "Unable to update snowlobe-lib flake input of $GLOBE_DIR. skipping this repo"
 				continue

@@ -6,11 +6,11 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.profiles.gaming;
+  cfg = config.snowglobe-factory.profiles.gaming;
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.profiles.gaming = {
+  options.snowglobe-factory.profiles.gaming = {
     enable = lib.mkEnableOption "utilities for that OOB Linux gaming experience";
   };
 
@@ -26,7 +26,7 @@ in
         # rgb control
         services.hardware.openrgb = {
           enable = slib.setDefault true;
-          motherboard = config.snowglobe-lib.system.cpu-vendor;
+          motherboard = config.snowglobe-factory.system.cpu-vendor;
         };
 
         hardware = {

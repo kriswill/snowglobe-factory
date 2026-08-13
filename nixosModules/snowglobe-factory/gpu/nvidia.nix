@@ -5,12 +5,12 @@
   ...
 }:
 let
-  cfg = config.snowglobe-lib.gpu.nvidia;
+  cfg = config.snowglobe-factory.gpu.nvidia;
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-lib.gpu.nvidia = {
-    enable = lib.mkEnableOption "Snowglobe-Lib's nvidia gpu configuration";
+  options.snowglobe-factory.gpu.nvidia = {
+    enable = lib.mkEnableOption "snowglobe-factory's nvidia gpu configuration";
   };
   config = lib.mkIf cfg.enable {
     services.xserver.videoDrivers = [ "nvidia" ];
@@ -25,7 +25,7 @@ in
       open = slib.setDefault true;
       # Enable the Nvidia settings menu,
       # accessible via `nvidia-settings`
-      nvidiaSettings = lib.mkIf config.snowglobe-lib.desktop.enable (slib.setDefault true);
+      nvidiaSettings = lib.mkIf config.snowglobe-factory.desktop.enable (slib.setDefault true);
 
       # latest stable nvidia drivers
       # nvidia loves dropping support for old cards, a manual override might be required

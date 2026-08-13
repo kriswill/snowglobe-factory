@@ -9,7 +9,7 @@ let
   slib = import ../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  config = lib.mkIf config.snowglobe-lib.enable {
+  config = lib.mkIf config.snowglobe-factory.enable {
     # ly does not allow services to start on login
     # https://codeberg.org/fairyglade/ly/issues/706
     systemd.services.display-manager.environment.XDG_CURRENT_DESKTOP =

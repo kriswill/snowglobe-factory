@@ -64,13 +64,13 @@ You can consume the modules directly from an existing nix flake
 ```nix
 {
   inputs = {
-    snowglobe-lib.url = "https://codeberg.org/earthgman/snowglobe-lib";
-    nixpkgs.follows = "snowglobe-lib/nixpkgs" # recommended but not required
+    snowglobe-factory.url = "https://codeberg.org/earthgman/snowglobe-factory";
+    nixpkgs.follows = "snowglobe-factory/nixpkgs" # recommended but not required
   };
 
-  outputs = { snowglobe-lib, nixpkgs }: 
+  outputs = { snowglobe-factory, nixpkgs }: 
   {
-    nixosConfigurations.myhostname = snowglobe-lib.lib.mkNixosHost {
+    nixosConfigurations.myhostname = snowglobe-factory.lib.mkNixosHost {
       hostname = "myhostname";
       system = "x86_64-linux";
       firmware = "UEFI";
