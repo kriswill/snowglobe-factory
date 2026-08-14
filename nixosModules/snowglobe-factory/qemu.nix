@@ -18,12 +18,13 @@ in
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
       {
-        environment.systemPackages = [ pkgs.dnsmasq ];
         boot.kernelModules =
           let
             cpu-vendor = config.snowglobe-factory.system.cpu-vendor;
           in
           lib.mkIf (cpu-vendor != null) [ "kvm-${cpu-vendor}" ];
+
+        networking.firewall.trustedInterfaces = [ "virbr0" ];
 
         virtualisation = {
           libvirtd = {
