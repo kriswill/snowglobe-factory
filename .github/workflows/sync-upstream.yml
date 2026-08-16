@@ -1,10 +1,10 @@
-# Keeps `main` in sync with the Codeberg upstream by merging it in on a
-# schedule. Merge (rather than force-push) so this workflow file survives
-# each sync — scheduled workflows only run from the default branch, so
-# overwriting main would delete the workflow and stop the syncing.
-#
-# `unstable` carries no workflow file, so it is mirrored exactly
-# (force-push) — upstream may rebase it, which a merge couldn't follow.
+# Keeps `main` and `unstable` in sync with the Codeberg upstream by merging
+# it in on a schedule. Merge (rather than force-push) so local commits and
+# this workflow file survive each sync — scheduled workflows only run from
+# the default branch, so overwriting main would delete the workflow and
+# stop the syncing, and unstable carries local commits not yet upstream.
+# Caveat: if upstream ever rebases unstable, the merge here will conflict
+# and the job will fail — resolve by manually resetting the branch.
 name: Sync main from Codeberg upstream
 
 on:
@@ -36,7 +36,9 @@ jobs:
           git merge --no-edit upstream/main
           git push origin main
 
-      - name: Mirror upstream/unstable
+      - name: Merge upstream/unstable and push
         run: |
           git fetch upstream unstable
-          git push --force origin refs/remotes/upstream/unstable:refs/heads/unstable
+          git checkout -B unstable origin/unstable
+          git merge --no-edit upstream/unstable
+          git push origin unstable
