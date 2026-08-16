@@ -26,11 +26,6 @@ in
       foot.enable = slib.setDefault true;
       # applications and dmenu
       rofi.enable = slib.setDefault true;
-      # Default shell - noctalia v5
-      noctalia = {
-        enable = slib.setDefault true;
-        systemd.enable = slib.setDefault true;
-      };
     };
   };
 }
