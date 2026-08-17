@@ -17,12 +17,6 @@ in
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
       {
-        environment = {
-          systemPackages = [
-            pkgs.protonup-ng
-          ];
-        };
-
         # rgb control
         services.hardware.openrgb = {
           enable = slib.setDefault true;

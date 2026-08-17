@@ -9,4 +9,5 @@ in
   _8bit-operator-font = callPackage ./_8bit-operator-font/package.nix { };
   star-pixel-icons = callPackage ./star-pixel-icons/package.nix { };
   helium = callPackage ./helium/package.nix { };
+  niko-oneshot-cursors = callPackage ./niko-oneshot-cursors/package.nix { };
 }

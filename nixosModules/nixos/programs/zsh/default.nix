@@ -14,6 +14,8 @@ in
     inherit programName pkgs;
     excludedOptions = [
       "enable"
+      # TODO after flake update
+      # "package"
     ];
   };
 
