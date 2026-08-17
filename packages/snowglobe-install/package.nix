@@ -3,6 +3,7 @@
 
   writeShellApplication,
   gitMinimal,
+  bat,
   nixos-install-tools,
   nixos-install,
   disko,
@@ -22,6 +23,7 @@ writeShellApplication {
   runtimeInputs = [
     gitMinimal
     fzf
+    bat
     nixos-install-tools
     nixos-install
     openssh

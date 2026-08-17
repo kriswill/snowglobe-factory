@@ -1,41 +1,46 @@
-# unencrypted disko with just a boot and root partition
+# password based luks encryption for legacy bios
 {
   disko.devices = {
     disk = {
-      # disk label
       nixos = {
-        # CHANGE PATH BEFORE FORMATTING (done by the installer)
-        device = "/dev/sda";
         type = "disk";
+        # CHANGE BEFORE FORMATTING
+        device = "/dev/sda";
         content = {
           # use a GPT disk for all systems
           type = "gpt";
           partitions = {
             # required for legacy bios / CSM mode to boot drives with GPT via grub
-            bios-boot = {
-              name = "bios-boot";
+            bios_grub = {
+              name = "BIOS_GRUB";
               type = "EF02";
               size = "1M";
             };
             esp = {
               name = "ESP";
-              type = "EF00";
               size = "512M";
+              type = "EF00";
               content = {
                 type = "filesystem";
                 format = "vfat";
                 mountpoint = "/boot";
-                # prevent a security hole warning for /dev/urandom
+                # ensure that boot is only accessible by root
                 mountOptions = [ "umask=0077" ];
               };
             };
-            root = {
-              name = "root";
+            luks = {
               size = "100%";
               content = {
-                type = "filesystem";
-                format = "ext4";
-                mountpoint = "/";
+                type = "luks";
+                name = "ROOT";
+                settings.allowDiscards = true;
+                # text file containing the password (only needed when formatting, handled by installer)
+                passwordFile = "/tmp/luks-password";
+                content = {
+                  type = "filesystem";
+                  format = "ext4";
+                  mountpoint = "/";
+                };
               };
             };
           };
