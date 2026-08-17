@@ -1,4 +1,5 @@
 {
+  lib,
   stdenvNoCC,
 }:
 stdenvNoCC.mkDerivation {
