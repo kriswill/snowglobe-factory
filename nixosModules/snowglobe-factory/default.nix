@@ -187,8 +187,6 @@ in
       disko.enable = slib.setDefault true;
       # vencord
       discord.package = slib.setDefault pkgs.vesktop;
-      # hardened firefox
-      firefox.package = slib.setDefault pkgs.librewolf;
       # bloat finder
       ncdu.enable = slib.setDefault true;
       # terminal multiplexer

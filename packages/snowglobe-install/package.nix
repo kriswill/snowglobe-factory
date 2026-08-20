@@ -4,6 +4,7 @@
   writeShellApplication,
   gitMinimal,
   bat,
+  gnused,
   nixos-install-tools,
   nixos-install,
   disko,
@@ -13,8 +14,6 @@
   fzf,
   nvd,
 }:
-let
-in
 writeShellApplication {
   name = "install.sh";
   bashOptions = [ ];
@@ -30,5 +29,6 @@ writeShellApplication {
     disko
     sops
     age
+    gnused
   ];
 }
