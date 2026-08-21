@@ -1,6 +1,7 @@
 {
   flake,
 
+  lib,
   writeShellApplication,
   gitMinimal,
   bat,
@@ -18,7 +19,9 @@ writeShellApplication {
   name = "install.sh";
   bashOptions = [ ];
   checkPhase = "";
-  text = builtins.readFile (flake + "/lib/scripts/snowglobe-install.sh");
+  text = lib.replaceString "#!/bin/sh" "" (
+    builtins.readFile (flake + "/lib/scripts/snowglobe-install.sh")
+  );
   runtimeInputs = [
     gitMinimal
     fzf
