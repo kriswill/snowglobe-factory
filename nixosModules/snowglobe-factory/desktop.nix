@@ -99,7 +99,6 @@ in
         };
 
         programs = {
-          helium.enable = slib.setDefault true;
           # control applet for networkmanager
           networkmanagerapplet.enable = slib.setDefault true;
           # notification daemon api

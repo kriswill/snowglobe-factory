@@ -1,8 +1,11 @@
 {
   flake,
 
+  lib,
   writeShellApplication,
   gitMinimal,
+  bat,
+  gnused,
   nixos-install-tools,
   nixos-install,
   disko,
@@ -12,21 +15,23 @@
   fzf,
   nvd,
 }:
-let
-in
 writeShellApplication {
   name = "install.sh";
   bashOptions = [ ];
   checkPhase = "";
-  text = builtins.readFile (flake + "/lib/scripts/snowglobe-install.sh");
+  text = lib.replaceString "#!/bin/sh" "" (
+    builtins.readFile (flake + "/lib/scripts/snowglobe-install.sh")
+  );
   runtimeInputs = [
     gitMinimal
     fzf
+    bat
     nixos-install-tools
     nixos-install
     openssh
     disko
     sops
     age
+    gnused
   ];
 }
