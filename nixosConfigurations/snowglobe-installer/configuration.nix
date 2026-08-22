@@ -21,6 +21,8 @@
 
     It is recommended to set password for the root user with `sudo passwd` to log in over ssh
 
+    If you are having trouble reading, use 'setfont -d' to double the font size.
+
     Begin install by running `install.sh` as root.
   '';
 
@@ -41,8 +43,8 @@
       "locales.txt".source = ../../lib/mixins/locales.txt;
 
       # provide disko configurations for the installer
-      "disko/defaults/default-ext4-luks.nix".source = ../../lib/mixins/disko/default-ext4-luks.nix;
-      "disko/defaults/default-ext4.nix".source = ../../lib/mixins/disko/default-ext4.nix;
+      "disko/defaults/gpt-ext4-luks.nix".source = ../../lib/mixins/disko/gpt-ext4-luks.nix;
+      "disko/defaults/gpt-ext4.nix".source = ../../lib/mixins/disko/gpt-ext4.nix;
     };
   };
 
