@@ -86,8 +86,10 @@ in
           jack.enable = slib.setDefault true;
         };
 
-        # TODO Decide if we want to enable flatpak by default and automate flathub setup if so
-        # configure flatpak
+        # prevent xterm from being installed by enabling the xserver
+        services.xserver.excludePackages = [ pkgs.xterm ];
+
+        # TODO Decide if we want to enable flatpak by default and automate flathub setup.
         services.flatpak.enable = slib.setDefault true;
         services.gnome = {
           # flatpak frontend of choice
@@ -97,7 +99,6 @@ in
         };
 
         programs = {
-          helium.enable = slib.setDefault true;
           # control applet for networkmanager
           networkmanagerapplet.enable = slib.setDefault true;
           # notification daemon api

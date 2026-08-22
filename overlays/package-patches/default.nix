@@ -41,27 +41,6 @@
   #   };
   # });
 
-  # ceph doesn't build
-  # https://github.com/NixOS/nixpkgs/issues/542206
-  ceph =
-    (prev.ceph.overrideScope (
-      _: prev: {
-        arrow-cpp = null;
-        ceph = prev.ceph.overrideAttrs (
-          {
-            cmakeFlags ? [ ],
-            ...
-          }:
-          {
-            cmakeFlags = cmakeFlags ++ [
-              (final.lib.cmakeBool "WITH_RADOSGW_SELECT_PARQUET" false)
-              (final.lib.cmakeBool "WITH_RADOSGW_ARROW_FLIGHT" false)
-            ];
-          }
-        );
-      }
-    )).ceph;
-
   # puddletag's icon is installed to the incorrect location
   # This causes some programs to display an empty icon entry
   puddletag = prev.puddletag.overrideAttrs (_: {
