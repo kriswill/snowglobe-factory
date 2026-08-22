@@ -55,21 +55,13 @@ lib.nixosSystem {
 
         assertions = [
           {
-            assertion = (
-              nixImplementation == "nix" || nixImplementation == "lix" || nixImplementation == "lix-main"
-            );
+            assertion = (nixImplementation == "nix" || nixImplementation == "lix");
             message = "slib.mkNixosHost: nixImplementation must be one of 'nix', 'lix', or 'lix-main'";
           }
         ];
       }
     ]
     # if 'nix' then do nothing
-    ++ lib.optionals (nixImplementation == "lix-main") [
-      {
-        # import lix module. Will be rolling release of lix
-        imports = [ inputs.lix-module.nixosModules.default ];
-      }
-    ]
     ++ lib.optionals (nixImplementation == "lix") [
       {
         # replace 'nix' in nixpkgs to be lix via overlay so all tooling will be compatible with it.
