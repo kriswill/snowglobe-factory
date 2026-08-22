@@ -110,39 +110,6 @@
         "type": "github"
       }
     },
-    "flake-utils_2": {
-      "inputs": {
-        "systems": "systems_2"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flakey-profile": {
-      "locked": {
-        "lastModified": 1712898590,
-        "narHash": "sha256-FhGIEU93VHAChKEXx905TSiPZKga69bWl1VB37FK//I=",
-        "owner": "lf-",
-        "repo": "flakey-profile",
-        "rev": "243c903fd8eadc0f63d205665a92d4df91d42d9d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lf-",
-        "repo": "flakey-profile",
-        "type": "github"
-      }
-    },
     "flux": {
       "inputs": {
         "mcman": "mcman",
@@ -219,43 +186,6 @@
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
         "type": "github"
-      }
-    },
-    "lix": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1787333238,
-        "narHash": "sha256-oz8UaslbfpfkP48D35mXT7OoaIsVaFkZrsgWqgYsL6s=",
-        "rev": "f5b3e27e0b8f19755333994cc0c370dfef84da37",
-        "type": "tarball",
-        "url": "https://git.lix.systems/api/v1/repos/lix-project/lix/archive/f5b3e27e0b8f19755333994cc0c370dfef84da37.tar.gz?rev=f5b3e27e0b8f19755333994cc0c370dfef84da37"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://git.lix.systems/lix-project/lix/archive/main.tar.gz"
-      }
-    },
-    "lix-module": {
-      "inputs": {
-        "flake-utils": "flake-utils_2",
-        "flakey-profile": "flakey-profile",
-        "lix": [
-          "lix"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1787327481,
-        "narHash": "sha256-c0Yuv8CXeXZqT9vew1NP8vZDgB0zIOEB9LtJwLkDThM=",
-        "rev": "b88667e364b56c848a35a1d15a61bdd45fd4ad0d",
-        "type": "tarball",
-        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/b88667e364b56c848a35a1d15a61bdd45fd4ad0d.tar.gz?rev=b88667e364b56c848a35a1d15a61bdd45fd4ad0d"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://git.lix.systems/lix-project/nixos-module/archive/main.tar.gz"
       }
     },
     "mcman": {
@@ -409,8 +339,6 @@
         "flux": "flux",
         "import-tree": "import-tree",
         "jovian-nixos": "jovian-nixos",
-        "lix": "lix",
-        "lix-module": "lix-module",
         "nix-index-database": "nix-index-database",
         "nix-post-build-hook-queue": "nix-post-build-hook-queue",
         "nixos-hardware": "nixos-hardware",
@@ -440,21 +368,6 @@
       }
     },
     "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
