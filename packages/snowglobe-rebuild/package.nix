@@ -6,8 +6,6 @@
   fzf,
   nvd,
 }:
-let
-in
 writeShellApplication {
   name = "snowglobe-rebuild";
   bashOptions = [ ];
