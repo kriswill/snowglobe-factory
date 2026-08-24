@@ -26,8 +26,6 @@ writeShellApplication {
     gitMinimal
     fzf
     bat
-    nixos-install-tools
-    nixos-install
     openssh
     disko
     sops
