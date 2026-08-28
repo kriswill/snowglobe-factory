@@ -16,30 +16,30 @@
     };
   });
 
-  # freetube = prev.freetube.overrideAttrs (old: rec {
-  #   version = "0.25.2-beta";
-  #   src = prev.fetchFromGitHub {
-  #     owner = "FreeTubeApp";
-  #     repo = "Freetube";
-  #     tag = "v0.25.2-beta";
-  #     hash = "sha256-A25I64GP4FRyP21W5QuVvrWpThyU7hDosO25vkIx0UY=";
-  #   };
-  #
-  #   patches = [
-  #     (prev.replaceVars ./freetube-build-script.patch {
-  #       electron-version = prev.electron.version;
-  #     })
-  #     ./freetube-targets.patch
-  #   ];
-  #
-  #   pnpmDeps = prev.fetchPnpmDeps {
-  #     inherit (old) pname;
-  #     inherit version src;
-  #     pnpm = prev.pnpm_10;
-  #     fetcherVersion = 4;
-  #     hash = "sha256-1OnmJi4xCxMALAac4jnLOKg5N/t3pcHgM0AgvF1+DpM=";
-  #   };
-  # });
+  freetube = prev.freetube.overrideAttrs (old: rec {
+    version = "0.25.3";
+    src = prev.fetchFromGitHub {
+      owner = "FreeTubeApp";
+      repo = "Freetube";
+      tag = "v0.25.3-beta";
+      hash = "sha256-eaf10W8dBMJDlqOFd57hsqQqRcBOYAMavLrfmkuRbSw=";
+    };
+
+    patches = [
+      (prev.replaceVars ./freetube-build-script.patch {
+        electron-version = prev.electron.version;
+      })
+      ./freetube-targets.patch
+    ];
+
+    pnpmDeps = prev.fetchPnpmDeps {
+      inherit (old) pname;
+      inherit version src;
+      pnpm = prev.pnpm_10;
+      fetcherVersion = 4;
+      hash = "sha256-rsgDxK6X2EzgPwIb9A9I+STkKI882i8jDuL4pO5kJHU=";
+    };
+  });
 
   # puddletag's icon is installed to the incorrect location
   # This causes some programs to display an empty icon entry
