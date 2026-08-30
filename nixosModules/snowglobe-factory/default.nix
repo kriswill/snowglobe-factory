@@ -191,8 +191,6 @@ in
       ncdu.enable = slib.setDefault true;
       # terminal multiplexer
       tmux.enable = slib.setDefault true;
-      # make sure libreoffice is bleeding edge
-      libreoffice.package = slib.setDefault pkgs.libreoffice-fresh;
       # alias to neovim if enabled
       neovim = {
         enable = slib.setDefault true;
