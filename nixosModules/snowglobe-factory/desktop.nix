@@ -53,8 +53,12 @@ in
       {
         # add a lightweight display-manager
         services.displayManager.ly.enable = slib.setDefault true;
-        # ensure that polkit is enabled
-        security.polkit.enable = true;
+        # enable polkit
+        security.polkit = {
+          enable = slib.setDefault true;
+          # enable pkexec functionality
+          enablePkexecWrapper = slib.setDefault config.security.polkit.enable;
+        };
         # add some vpn plugins to network manager
         networking.networkmanager.plugins = builtins.attrValues {
           inherit (pkgs)
