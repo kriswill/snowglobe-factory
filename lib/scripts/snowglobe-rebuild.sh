@@ -26,11 +26,6 @@ _warnmsg() {
 	_msg "Warning: $1" || return 1
 }
 
-_exitmsg() {
-	_msg "$1"
-	exit 0
-}
-
 _desktop_active() {
 	[ "${DISPLAY-}" ] || [ "${WAYLAND_DISPLAY-}" ]
 }

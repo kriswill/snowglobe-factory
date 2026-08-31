@@ -56,8 +56,6 @@ in
         # enable polkit
         security.polkit = {
           enable = slib.setDefault true;
-          # enable pkexec functionality
-          enablePkexecWrapper = slib.setDefault config.security.polkit.enable;
         };
         # add some vpn plugins to network manager
         networking.networkmanager.plugins = builtins.attrValues {
