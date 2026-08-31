@@ -26,11 +26,6 @@ _warnmsg() {
 	_msg "Warning: $1" || return 1
 }
 
-_exitmsg() {
-	_msg "$1"
-	exit 0
-}
-
 _desktop_active() {
 	[ "${DISPLAY-}" ] || [ "${WAYLAND_DISPLAY-}" ]
 }
@@ -64,23 +59,6 @@ _notify() {
 # main
 [ "${1-}" ] || _errormsg "Unknown usage."
 
-_restore_git_stash() {
-	if [ "${GIT_STASHED-}" ]; then
-		git stash apply >/dev/null || _errormsg "Could not apply git stash. You may have to manually run git stash apply to recover your changes."
-		unset GIT_STASHED
-		# add applied stash to back to the work tree
-		git add .
-	fi
-}
-
-_sigint_cleanup() {
-	_restore_git_stash
-	printf "\nInterrupted" >"$(tty)"
-	exit 1
-}
-
-trap '_sigint_cleanup' INT
-
 case "$1" in
 # TODO implement configuration via nixos module
 "help" | "--help")
@@ -103,6 +81,23 @@ case "$1" in
 	;;
 "info" | "rollback") CAN_USE_NH_OS=1 ;;
 esac
+
+_restore_git_stash() {
+	if [ "${GIT_STASHED-}" ]; then
+		git stash apply >/dev/null || _errormsg "Could not apply git stash. You may have to manually run git stash apply to recover your changes."
+		unset GIT_STASHED
+		# add applied stash to back to the work tree
+		git add .
+	fi
+}
+
+_sigint_cleanup() {
+	_restore_git_stash
+	printf "\nInterrupted" >"$(tty)"
+	exit 1
+}
+
+trap '_sigint_cleanup' INT
 
 ARG_IDX=1
 for arg in "$@"; do
@@ -127,6 +122,7 @@ done
 [ "${FLAKE_DIR-}" ] || FLAKE_DIR="/etc/nixos"
 [ -e "$FLAKE_DIR/flake.nix" ] || _errormsg "no flake found in $FLAKE_DIR"
 
+UPDATE_LOG="$FLAKE_DIR/updates.log"
 FLAKE_DIR_OWNER="$(stat -c '%U' -L "$FLAKE_DIR")"
 WHOAMI="$(whoami)"
 
@@ -157,14 +153,22 @@ cd "$FLAKE_DIR" || _errormsg "Could not change working directory to $FLAKE_DIR"
 
 [ -d "$FLAKE_DIR/.git" ] && GIT_REPO_PRESENT=1
 
+_commit_flake_lock() {
+	if git status | grep -q flake.lock; then
+		git add flake.lock || _errormsg "Failed to add changes to flake.lock to git."
+		git commit -m "update flake.lock" || _errormsg "Failed to commit update to flake.lock"
+	fi
+}
+
 if [ "${GIT_REPO_PRESENT-}" ]; then
 	[ "$WHOAMI" = "$FLAKE_DIR_OWNER" ] || _errormsg "$FLAKE_DIR is not owned by the current user. Git operations cannot continue safely."
+	_commit_flake_lock
 	[ "$(git remote)" ] && REMOTE_PRESENT=1
 
 	# attempt to pull any changes from your configured remote to ensure that you are up to date locally
 	if [ "${REMOTE_PRESENT-}" ]; then
 		git ls-remote -q && REMOTE_REACHABLE=1
-		! git status | grep -q "nothing to commit, working tree clean" && DIRTY_WORKTREE=1
+		git status | grep -q "nothing to commit, working tree clean" || DIRTY_WORKTREE=1
 		if [ "${REMOTE_REACHABLE-}" ]; then
 			git fetch || _errormsg "Failed to fetch from remote."
 			# pull with rebase if your local is behind your remote
@@ -233,19 +237,12 @@ else
 	nixos-rebuild "$@" || _notify "Error" "$ERRORMSG"
 fi
 
-# check if the flake was updated by args passed to nh or nixos-rebuild and commit it
 if [ "${PERSISTENT-}" ]; then
-	if [ "${GIT_REPO_PRESENT-}" ]; then
-		if git status | grep -q flake.lock; then
-			git add . || _errormsg "Failed to add changes to flake.lock to git."
-			git commit -m "update flake.lock" || _errormsg "Failed to commit update to flake.lock"
-		fi
-	fi
-
+	# check if the flake was updated by args passed to nh or nixos-rebuild and commit it
+	[ "${GIT_REPO_PRESENT-}" ] && _commit_flake_lock
+	[ "${TARGET_HOST-}" ] || TARGET_HOST="$(cat /etc/hostname)"
 	# keep a log file of your system updates
 	# this log uses a tool 'nvd' to display all package changes
-	UPDATE_LOG="$FLAKE_DIR/updates.log"
-	[ "${TARGET_HOST-}" ] || TARGET_HOST="$(cat /etc/hostname)"
 	if [ ! -e "$UPDATE_LOG" ]; then
 		touch "$UPDATE_LOG" >/dev/null 2>&1 || $ELEVATION_PROGRAM touch "$UPDATE_LOG"
 	fi
@@ -296,3 +293,5 @@ if [ "${PERSISTENT-}" ]; then
 		fi
 	fi
 fi
+
+exit 0
