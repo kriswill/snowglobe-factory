@@ -33,6 +33,7 @@ in
         };
 
         programs = {
+          arp-scan.enable = slib.setDefault true;
           tcpdump.enable = slib.setDefault true;
           metasploit.enable = slib.setDefault true;
           lynx.enable = slib.setDefault true;
