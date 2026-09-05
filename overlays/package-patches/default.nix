@@ -16,30 +16,44 @@
     };
   });
 
-  freetube = prev.freetube.overrideAttrs (old: rec {
-    version = "0.25.3";
-    src = prev.fetchFromGitHub {
-      owner = "FreeTubeApp";
-      repo = "Freetube";
-      tag = "v0.25.3-beta";
-      hash = "sha256-eaf10W8dBMJDlqOFd57hsqQqRcBOYAMavLrfmkuRbSw=";
+  python314 = prev.python314.override {
+    packageOverrides = pyfinal: pyprev: {
+      sip = pyprev.sip.overrideAttrs (old: {
+        patches = [
+          (prev.fetchpatch {
+            name = "legacy-api-binding-fix.patch";
+            url = "https://github.com/Python-SIP/sip/commit/09598895c607f3e41f0249ade217ace0a4da6437.patch";
+            hash = "sha256-v0YeHyg0ymB0v32gpVRbMBIUk9U2etjs93VuOGPGg2M=";
+          })
+        ];
+      });
     };
+  };
 
-    patches = [
-      (prev.replaceVars ./freetube-build-script.patch {
-        electron-version = prev.electron.version;
-      })
-      ./freetube-targets.patch
-    ];
-
-    pnpmDeps = prev.fetchPnpmDeps {
-      inherit (old) pname;
-      inherit version src;
-      pnpm = prev.pnpm_10;
-      fetcherVersion = 4;
-      hash = "sha256-rsgDxK6X2EzgPwIb9A9I+STkKI882i8jDuL4pO5kJHU=";
-    };
-  });
+  # freetube = prev.freetube.overrideAttrs (old: rec {
+  #   version = "0.25.3";
+  #   src = prev.fetchFromGitHub {
+  #     owner = "FreeTubeApp";
+  #     repo = "Freetube";
+  #     tag = "v0.25.3-beta";
+  #     hash = "sha256-eaf10W8dBMJDlqOFd57hsqQqRcBOYAMavLrfmkuRbSw=";
+  #   };
+  #
+  #   patches = [
+  #     (prev.replaceVars ./freetube-build-script.patch {
+  #       electron-version = prev.electron.version;
+  #     })
+  #     ./freetube-targets.patch
+  #   ];
+  #
+  #   pnpmDeps = prev.fetchPnpmDeps {
+  #     inherit (old) pname;
+  #     inherit version src;
+  #     pnpm = prev.pnpm_10;
+  #     fetcherVersion = 4;
+  #     hash = "sha256-rsgDxK6X2EzgPwIb9A9I+STkKI882i8jDuL4pO5kJHU=";
+  #   };
+  # });
 
   # puddletag's icon is installed to the incorrect location
   # This causes some programs to display an empty icon entry
