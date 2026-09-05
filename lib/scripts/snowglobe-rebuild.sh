@@ -26,11 +26,6 @@ _warnmsg() {
 	_msg "Warning: $1" || return 1
 }
 
-_exitmsg() {
-	_msg "$1"
-	exit 0
-}
-
 _desktop_active() {
 	[ "${DISPLAY-}" ] || [ "${WAYLAND_DISPLAY-}" ]
 }
@@ -50,7 +45,7 @@ _notify() {
 	fi
 
 	if [ "${ENABLE_NOTIFICATIONS-}" ]; then
-		notify-send -a "$SCRIPT_NAME" "$STATUS" "$MSG" || _warnmsg "Failed to send desktop notification with content: $MSG"
+		notify-send -a "snowglobe-rebuild" "$STATUS" "$MSG" || _warnmsg "Failed to send desktop notification with content: $MSG"
 	fi
 
 	case $STATUS in
@@ -63,6 +58,29 @@ _notify() {
 
 # main
 [ "${1-}" ] || _errormsg "Unknown usage."
+
+case "$1" in
+# TODO implement configuration via nixos module
+"help" | "--help")
+	printf "Wrapper around nh os and nixos-rebuild.\n"
+	printf "usage: snowglobe-rebuild [options]\n\n"
+
+	printf "Options are directly passed to one of the two programs.\n"
+	printf "For commands that use can 'nh os' (boot, switch, test, repl, etc) use man nh to see options.\n"
+	printf "For others use man nixos-rebuild or 'nixos-rebuild --help'\n"
+	exit 0
+	;;
+"test")
+	NEEDS_PRIVILEGES=1
+	CAN_USE_NH_OS=1
+	;;
+"switch" | "boot")
+	PERSISTENT=1
+	NEEDS_PRIVILEGES=1
+	CAN_USE_NH_OS=1
+	;;
+"info" | "rollback") CAN_USE_NH_OS=1 ;;
+esac
 
 _restore_git_stash() {
 	if [ "${GIT_STASHED-}" ]; then
@@ -81,29 +99,6 @@ _sigint_cleanup() {
 
 trap '_sigint_cleanup' INT
 
-case "$1" in
-# TODO implement configuration via nixos module
-"help" | "--help")
-	printf "Wrapper around nh os and nixos-rebuild.\n"
-	printf "usage: snowglobe-rebuild [options]\n\n"
-
-	printf "Options are directly passed to one of the two programs.\n"
-	printf "For commands that use can 'nh os' (boot, switch, test, repl, etc) use man nh to see options.\n"
-	printf "For others use man nixos-rebuild or 'nixos-rebuild --help'\n"
-	exit 0
-	;;
-"test")
-	NEEDS_SUDO=1
-	CAN_USE_NH_OS=1
-	;;
-"switch" | "boot")
-	PERSISTENT=1
-	NEEDS_SUDO=1
-	CAN_USE_NH_OS=1
-	;;
-"info" | "rollback") CAN_USE_NH_OS=1 ;;
-esac
-
 ARG_IDX=1
 for arg in "$@"; do
 	NEXT_ARG=$(printf "%s " "$@" | cut -d' ' -f$((ARG_IDX + 1)))
@@ -115,6 +110,11 @@ for arg in "$@"; do
 		TARGET_HOST=$(printf "%s" "$NEXT_ARG" | cut -d'@' -f2)
 		[ "${TARGET_HOST-}" ] || _errormsg "No target host was specified"
 		;;
+		# nh and nixos-rebuild have different names for this for some reason
+	"--elevate" | "--elevation-strategy")
+		ELEVATION_PROGRAM="$NEXT_ARG"
+		_is_on_path "$ELEVATION_PROGRAM" || _notify "Error" "Elevation program: $ELEVATION_PROGRAM is not on path."
+		;;
 	esac
 	ARG_IDX=$((ARG_IDX + 1))
 done
@@ -122,30 +122,53 @@ done
 [ "${FLAKE_DIR-}" ] || FLAKE_DIR="/etc/nixos"
 [ -e "$FLAKE_DIR/flake.nix" ] || _errormsg "no flake found in $FLAKE_DIR"
 
+UPDATE_LOG="$FLAKE_DIR/updates.log"
 FLAKE_DIR_OWNER="$(stat -c '%U' -L "$FLAKE_DIR")"
 WHOAMI="$(whoami)"
 
 if [ "$WHOAMI" = "root" ]; then
 	unset CAN_USE_NH_OS
-	unset NEEDS_SUDO
+	unset NEEDS_PRIVILEGES
+fi
+
+if [ "${NEEDS_PRIVILEGES-}" ] && [ ! "${ELEVATION_PROGRAM-}" ]; then
+	# pkexec only appears in /run/wrappers/bin if the option config.security.polkit.enablePkexecWrapper is true
+	# while the program exists in /run/current-system/sw/bin by default, it does not function properly.
+	# It is possible to change this location but most users probably will not.
+	if [ -e /run/wrappers/bin/pkexec ]; then
+		ELEVATION_PROGRAM="pkexec"
+	else
+		# use systemd's run0 as opposed to sudo due to its integration with polkit
+		ELEVATION_PROGRAM="run0"
+	fi
 fi
 
 if ! _is_on_path "nh" && [ "${CAN_USE_NH_OS-}" ]; then
 	unset CAN_USE_NH_OS
+else
+	NH_ELEVATION_STRATEGY="$ELEVATION_PROGRAM" export NH_ELEVATION_STRATEGY
 fi
 
 cd "$FLAKE_DIR" || _errormsg "Could not change working directory to $FLAKE_DIR"
 
 [ -d "$FLAKE_DIR/.git" ] && GIT_REPO_PRESENT=1
 
+_commit_flake_lock() {
+	if git status | grep -q flake.lock; then
+		git add flake.lock || _errormsg "Failed to add changes to flake.lock to git."
+		git commit -m "update flake.lock" || _errormsg "Failed to commit update to flake.lock"
+	fi
+}
+
 if [ "${GIT_REPO_PRESENT-}" ]; then
 	[ "$WHOAMI" = "$FLAKE_DIR_OWNER" ] || _errormsg "$FLAKE_DIR is not owned by the current user. Git operations cannot continue safely."
+	_commit_flake_lock
 	[ "$(git remote)" ] && REMOTE_PRESENT=1
 
 	# attempt to pull any changes from your configured remote to ensure that you are up to date locally
 	if [ "${REMOTE_PRESENT-}" ]; then
 		git ls-remote -q && REMOTE_REACHABLE=1
-		! git status | grep -q "nothing to commit, working tree clean" && DIRTY_WORKTREE=1
+		git status | grep -q "nothing to commit, working tree clean" || DIRTY_WORKTREE=1
 		if [ "${REMOTE_REACHABLE-}" ]; then
 			git fetch || _errormsg "Failed to fetch from remote."
 			# pull with rebase if your local is behind your remote
@@ -205,8 +228,8 @@ if [ "${GIT_REPO_PRESENT-}" ]; then
 fi
 
 ERRORMSG="Rebuild failed or timeout reached."
-if [ "${NEEDS_SUDO-}" ] && [ ! "${CAN_USE_NH_OS-}" ]; then
-	sudo nixos-rebuild "$@" || _notify "Error" "$ERRORMSG"
+if [ "${NEEDS_PRIVILEGES-}" ] && [ ! "${CAN_USE_NH_OS-}" ]; then
+	$ELEVATION_PROGRAM nixos-rebuild "$@" || _notify "Error" "$ERRORMSG"
 elif [ "${CAN_USE_NH_OS-}" ]; then
 	NH_OS_FLAKE="$(readlink -f "$FLAKE_DIR")" export NH_OS_FLAKE
 	nh os "$@" || _notify "Error" "$ERRORMSG"
@@ -214,22 +237,14 @@ else
 	nixos-rebuild "$@" || _notify "Error" "$ERRORMSG"
 fi
 
-# check if the flake was updated by args passed to nh or nixos-rebuild and commit it
 if [ "${PERSISTENT-}" ]; then
-	if [ "${GIT_REPO_PRESENT-}" ]; then
-		if git status | grep -q flake.lock; then
-			git add . || _errormsg "Failed to add changes to flake.lock to git."
-			git commit -m "update flake.lock" || _errormsg "Failed to commit update to flake.lock"
-		fi
-	fi
-
+	# check if the flake was updated by args passed to nh or nixos-rebuild and commit it
+	[ "${GIT_REPO_PRESENT-}" ] && _commit_flake_lock
+	[ "${TARGET_HOST-}" ] || TARGET_HOST="$(cat /etc/hostname)"
 	# keep a log file of your system updates
 	# this log uses a tool 'nvd' to display all package changes
-	UPDATE_LOG="$FLAKE_DIR/updates.log"
-	[ "${TARGET_HOST-}" ] || TARGET_HOST="$(cat /etc/hostname)"
 	if [ ! -e "$UPDATE_LOG" ]; then
-		# sudo use should already be cached from nixos-rebuild or nh os
-		touch "$UPDATE_LOG" >/dev/null 2>&1 || sudo touch "$UPDATE_LOG"
+		touch "$UPDATE_LOG" >/dev/null 2>&1 || $ELEVATION_PROGRAM touch "$UPDATE_LOG"
 	fi
 
 	NIXOS_GENERATION_INFO=$(nixos-rebuild list-generations | grep True | tr -s ' ' | cut -d' ' -f1-5)
@@ -251,7 +266,7 @@ if [ "${PERSISTENT-}" ]; then
 		if [ "$WHOAMI" = "$FLAKE_DIR_OWNER" ]; then
 			mv /tmp/snowglobe-system-update.log "$UPDATE_LOG" || _errormsg "Could not move updates.log into place"
 		else
-			sudo mv /tmp/snowglobe-system-update.log "$UPDATE_LOG" || _errormsg "Could not move updates.log into place"
+			$ELEVATION_PROGRAM mv /tmp/snowglobe-system-update.log "$UPDATE_LOG" || _errormsg "Could not move updates.log into place"
 		fi
 
 		if [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ] && [ "${GIT_REPO_PRESENT-}" ]; then
@@ -278,3 +293,5 @@ if [ "${PERSISTENT-}" ]; then
 		fi
 	fi
 fi
+
+exit 0
