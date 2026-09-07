@@ -185,8 +185,6 @@ in
       obs-studio.enableVirtualCamera = slib.setDefault true;
       # declarative disk partitioning tool
       disko.enable = slib.setDefault true;
-      # vencord
-      discord.package = slib.setDefault pkgs.vesktop;
       # bloat finder
       ncdu.enable = slib.setDefault true;
       # terminal multiplexer
