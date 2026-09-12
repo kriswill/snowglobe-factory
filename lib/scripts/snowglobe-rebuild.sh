@@ -162,7 +162,6 @@ _commit_flake_lock() {
 
 if [ "${GIT_REPO_PRESENT-}" ]; then
 	[ "$WHOAMI" = "$FLAKE_DIR_OWNER" ] || _errormsg "$FLAKE_DIR is not owned by the current user. Git operations cannot continue safely."
-	_commit_flake_lock
 	[ "$(git remote)" ] && REMOTE_PRESENT=1
 
 	# attempt to pull any changes from your configured remote to ensure that you are up to date locally
@@ -194,36 +193,37 @@ if [ "${GIT_REPO_PRESENT-}" ]; then
 			y_or_n "Continue without git synchronization features?" || _errormsg "Aborted"
 			IGNORE_GIT_SYNCHRONIZATION=1
 		fi
+	fi
 
-		if [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ] && [ "${DIRTY_WORKTREE-}" ] && [ "${PERSISTENT-}" ]; then
-			SELECTED_OPTION=$(
-				printf "Commit (recommended)\nStash\nAbort" |
-					fzf \
-						--border \
-						--border-label-pos=1:bottom \
-						--border-label="Detected a dirty worktree. What would you like to do with your uncommitted changes?" \
-						--preview="git status"
-			)
-			case "${SELECTED_OPTION-}" in
-			"Commit (recommended)")
-				_restore_git_stash
-				git status
-				printf "Commit Message: "
-				read -r COMMIT_MSG
-				[ "${COMMIT_MSG-}" ] || _errormsg "No commit message was entered."
-				git add . || _errormsg "Could not add changes to git"
-				git commit -m "$COMMIT_MSG" || _errormsg "Could not commit these changes to git."
-				;;
-			"Stash")
-				git stash >/dev/null || _errormsg "Could not stash your local changes."
-				GIT_STASHED=1
-				;;
-			*)
-				_restore_git_stash
-				_errormsg "Aborted"
-				;;
-			esac
-		fi
+	if [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ] && [ "${DIRTY_WORKTREE-}" ] && [ "${PERSISTENT-}" ]; then
+		_commit_flake_lock
+		SELECTED_OPTION=$(
+			printf "Commit (recommended)\nStash\nAbort" |
+				fzf \
+					--border \
+					--border-label-pos=1:bottom \
+					--border-label="Detected a dirty worktree. What would you like to do with your uncommitted changes?" \
+					--preview="git status"
+		)
+		case "${SELECTED_OPTION-}" in
+		"Commit (recommended)")
+			_restore_git_stash
+			git status
+			printf "Commit Message: "
+			read -r COMMIT_MSG
+			[ "${COMMIT_MSG-}" ] || _errormsg "No commit message was entered."
+			git add . || _errormsg "Could not add changes to git"
+			git commit -m "$COMMIT_MSG" || _errormsg "Could not commit these changes to git."
+			;;
+		"Stash")
+			git stash >/dev/null || _errormsg "Could not stash your local changes."
+			GIT_STASHED=1
+			;;
+		*)
+			_restore_git_stash
+			_errormsg "Aborted"
+			;;
+		esac
 	fi
 fi
 

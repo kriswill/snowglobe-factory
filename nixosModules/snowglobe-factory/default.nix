@@ -185,8 +185,6 @@ in
       obs-studio.enableVirtualCamera = slib.setDefault true;
       # declarative disk partitioning tool
       disko.enable = slib.setDefault true;
-      # vencord
-      discord.package = slib.setDefault pkgs.vesktop;
       # bloat finder
       ncdu.enable = slib.setDefault true;
       # terminal multiplexer
@@ -211,6 +209,8 @@ in
       jq.enable = slib.setDefault true;
       # better top
       btop.enable = slib.setDefault true;
+      # improved selectdefaultapplication
+      selectdefaultapplication.package = slib.setDefault pkgs.selectdefaultapplication-qt6;
       # fuzzy finder and manager for systemd units
       sysz.enable = slib.setDefault true;
       # wrapper script for nixos-rebuild

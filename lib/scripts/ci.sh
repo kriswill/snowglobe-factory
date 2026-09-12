@@ -188,7 +188,7 @@ while :; do
 		if [ "$ORIGINAL_BRANCH" != "main" ]; then
 			git checkout main || _errormsg "Could not check out main branch"
 		fi
-		WEBSITE_IP="homebase.internal.earthgman.dev"
+		WEBSITE_IP="192.168.25.69"
 		# use a temporary upload dir so I can replace all images on the website at once
 		UPLOAD_DIR="/tmp/snowglobe-installers"
 		WEBSITE_DIR="/srv/static-web-server/snowglobe-installers"
