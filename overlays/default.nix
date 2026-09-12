@@ -33,6 +33,7 @@ rec {
 
   # overlays from other flakes. These are auto consumed with the modulesets.
   nix-post-build-hook-queue = inputs.nix-post-build-hook-queue.overlays.default;
+  selectdefaultapplication-qt6 = inputs.selectdefaultapplication-qt6.overlays.default;
   flux = inputs.flux.overlays.default;
 
   default = snowglobe-pkgs;
