@@ -131,7 +131,7 @@ if [ "$WHOAMI" = "root" ]; then
 	unset NEEDS_PRIVILEGES
 fi
 
-if [ "${NEEDS_PRIVILEGES-}" ] && [ ! "${ELEVATION_PROGRAM-}" ]; then
+if [ ! "${ELEVATION_PROGRAM-}" ]; then
 	# pkexec only appears in /run/wrappers/bin if the option config.security.polkit.enablePkexecWrapper is true
 	# while the program exists in /run/current-system/sw/bin by default, it does not function properly.
 	# It is possible to change this location but most users probably will not.
