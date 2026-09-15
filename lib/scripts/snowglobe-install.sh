@@ -247,7 +247,7 @@ _select_disk() {
 
 _format_disks() {
 	clear
-  if [ "${INSTALLATION_METHOD}" = "existing" ]; then
+	if [ "${INSTALLATION_METHOD}" = "existing" ]; then
 		printf "\nBecause this is an existing configuration, you may wish to only repair the configuration or detect hardware changes.\n"
 		printf "If this is the case, you should not continue with formatting because it will wipe any data on your disk.\n"
 		if ! y_or_n "Proceed with formatting"; then
@@ -274,7 +274,6 @@ _format_disks() {
 		y_or_n "Do you wish to skip formatting?" default="yes" && return 0
 	fi
 
-	
 	_validate_disko_file() {
 		# will try its best detect whether the selected file is actually a disko file or is a bogus nix file
 		# not 100% bullet-proof, but should be good enough.
@@ -427,11 +426,11 @@ _install_existing() {
 	HOST_CONFIG_DIR="$CONFIG_ROOT/nixosConfigurations/$HOSTNAME"
 
 	_format_disks
-  _debugmsg "Hostname $HOSTNAME"
+	_debugmsg "Hostname $HOSTNAME"
 
 	clear
 	if [ -z "$(ls -A /mnt)" ]; then
-    printf "Nothing found in the /mnt directory.\n"
+		printf "Nothing found in the /mnt directory.\n"
 		printf "If you are repairing an existing host, you must mount the required filesystems.\n"
 		while :; do
 			_confirm "Press any key when the required filesystems are mounted..."
@@ -444,7 +443,7 @@ _install_existing() {
 		done
 	fi
 
-  if [ -e "$CONFIG_ROOT" ]; then
+	if [ -e "$CONFIG_ROOT" ]; then
 		rm -rf "$CONFIG_ROOT"
 	fi
 	mkdir -p "$CONFIG_ROOT"
@@ -452,7 +451,7 @@ _install_existing() {
 	cp -rf "$REPO_DIR"/* "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
 	_get_nixos_hardware_config
 
-  # modify the arguments to the mkNixosHost function to reflect the host's current hardware state
+	# modify the arguments to the mkNixosHost function to reflect the host's current hardware state
 	# Also needed to update system.stateVersion
 	_set_hardware_info
 
@@ -462,19 +461,19 @@ _install_existing() {
 		sed -i -r "/$HOSTNAME = slib.mkNixosHost/,/$PARAMETER_NAME/ s|$PARAMETER_NAME.*|$PARAMETER_NAME = $PARAMETER_VAL;|" "$HOSTS_CONFIG_FILE"
 	}
 
-  _set_hardware_parameter "firmware" "\"$FIRMWARE\""
+	_set_hardware_parameter "firmware" "\"$FIRMWARE\""
 	_set_hardware_parameter "cpu-vendor" "\"$CPU_VENDOR\""
 	IFS=' '
 	_set_hardware_parameter "gpu-vendors" "[ $(for vendor in $GPU_VENDORS; do
-		printf "\"%s\"" "$vendor" 
-  done) ]"
+		printf "\"%s\"" "$vendor"
+	done) ]"
 	unset IFS
 
-  _set_hardware_parameter "isVM" "$IS_VM"
+	_set_hardware_parameter "isVM" "$IS_VM"
 	_set_hardware_parameter "stateVersion" "\"$NIXOS_VERSION\""
 
 	printf "\nchecking configuration\n"
-  if [ "$(nix eval /mnt/etc/nixos'#'nixosConfigurations."$HOSTNAME".config.sops.secrets)" != "{ }" ]; then
+	if [ "$(nix eval /mnt/etc/nixos'#'nixosConfigurations."$HOSTNAME".config.sops.secrets)" != "{ }" ]; then
 		SOPS_PRIVATE_KEY_FILE="$(nix eval /mnt/etc/nixos'#'nixosConfigurations."$HOSTNAME".config.sops.age.keyFile | tr -d '"')"
 		if [ ! -e "/mnt$SOPS_PRIVATE_KEY_FILE" ]; then
 			printf "\nDetected sops secrets from this configuration.\n"
@@ -496,7 +495,7 @@ _print_gpu_vendors() {
 	if [ "${GPU_VENDORS-}" ]; then
 		IFS=' '
 		for vendor in $GPU_VENDORS; do
-			printf "%s\n" "$vendor"
+			printf "\"%s\"\n" "$vendor"
 		done
 		unset IFS
 	fi
@@ -504,7 +503,7 @@ _print_gpu_vendors() {
 
 _set_hardware_info() {
 	[ -d /sys/firmware/efi ] && FIRMWARE="UEFI"
-	FIRMWARE="${FIMWARE:-"BIOS"}"
+	FIRMWARE="${FIRMWARE:-"BIOS"}"
 
 	if lscpu | grep -i "intel" >/dev/null; then
 		CPU_VENDOR="intel"
@@ -550,7 +549,7 @@ DISKO_CONFIGURATIONS_DIR=${DISKO_CONFIGURATIONS_DIR:-"/etc/disko"}
 # directory which will be scanned for existing hosts
 REPO_DIR=${REPO_DIR:-"/tmp/your-globe"}
 SUPPORTED_DESKTOP_ENVIRONMENTS="KDE|Niri|LabWC|Hyprland|None"
-SUPPORTED_WEB_BROWSERS="Chromium|Helium|Firefox|Librewolf|Tor-Browser"
+SUPPORTED_WEB_BROWSERS="Chromium|Helium|Brave|Firefox|Librewolf|Mullvad-Browser|None"
 
 CONFIG_ROOT="/mnt/etc/nixos"
 HOSTS_CONFIG_FILE="$CONFIG_ROOT/nixosConfigurations/default.nix"
@@ -596,7 +595,6 @@ INSTALLATION_METHOD="${INSTALLATION_METHOD:-"new"}"
 [ "$INSTALLATION_METHOD" = "existing" ] && _install_existing
 
 _format_disks
-
 
 if [ -d "${CONFIG_ROOT}" ]; then
 	rm -rf "$CONFIG_ROOT" || _errormsg "Failed to remove $CONFIG_ROOT"
@@ -689,14 +687,14 @@ _enable_profile() {
 
 _set_optional_profiles() {
 	[ "${OPTIONAL_PROFILES-}" ] && unset OPTIONAL_PROFILES
-	y_or_n "Install programs for hardware diagnostics?" default="no" && _enable_profile "hardware-tools"
+	y_or_n "Install programs for hardware diagnostics? (smartmontools, vdpauinfo, mesa-demos, libva-utils, inxi, lshw, etc)" default="no" && _enable_profile "hardware-tools"
 	if [ "${DESKTOP_ENVIRONMENT-}" ]; then
 		y_or_n "Install programs for gaming? (steam, lutris, etc?)" default="no" && _enable_profile "gaming"
 		y_or_n "Install programs for office work? (libreoffice, email client, local CUPS printing server, etc?)" default="no" && _enable_profile "office"
 	fi
 	y_or_n "Install penetration and security testing tools from Kali Linux? (nmap, tor-browser, john-the-ripper, wireshark, etc)" default="no" && _enable_profile "hacker-mode"
 	y_or_n "Install additional nix tools? (recommended for developers)" default="no" && _enable_profile "nix-tools"
-	y_or_n "Would you like to harden your configuration? This disables some features like password-based ssh authentication and mutable user configuration for increased security." default="no" && _enable_profile "harden"
+	y_or_n "Would you like to harden your configuration? This disables some features like password-based ssh authentication and mutable user configuration for increased security. (recommended for public facing servers)" default="no" && _enable_profile "harden"
 }
 
 _set_desktop_environment() {
@@ -785,11 +783,19 @@ while :; do
 	printf "\nDetected Hardware Configuration:\n"
 	printf "CPU Brand - %s\n" "$CPU_VENDOR"
 	if [ "${GPU_VENDORS-}" ]; then
-		printf "GPU Brands - %s\n" "$(_print_gpu_vendors)"
+		IFS=' '
+		printf "GPU Brands - %s\n" "$(
+			for gpu in $GPU_VENDORS; do
+				printf "%s " "$gpu"
+			done
+		)"
+		unset IFS
 	fi
 	printf "Firmware - %s\n" "$FIRMWARE"
 	printf "CPU Arch - %s\n" "$CPU_ARCH"
-	[ "${IS_VM-}" ] && printf "Virtual Machine - True\n"
+	if [ "${IS_VM-}" ] && [ "${IS_VM}" = true ]; then
+		printf "Virtual Machine - True\n"
+	fi
 
 	printf "\nNixOS Information\n"
 	printf "Version - %s\n" "$NIXOS_VERSION"
@@ -1093,7 +1099,7 @@ if [ ! "${AGE_KEY_NAME-}" ]; then
 	printf "IMPORTANT:\n"
 	printf "The generated private key is stored at %s.\n" "$PRIVATE_KEY_FILE"
 	printf "This will allow the super user (sudo) to create and modify your secrets for this host.\n"
-	printf "It is imperative that you create a backup of this private key after installation is complete. If you lose it, you will no longer be able to access your secrets and your system cannot rebuild.\n"
+	printf "It is imperative that you create a backup of this private key after installation is complete. If you lose it, you will no longer be able to access your secrets and your system cannot rebuild.\n\n"
 	_confirm "Press any key to acknowledge..."
 	NEW_AGE_KEY=1
 # else if the key was selected from your keyring
@@ -1372,13 +1378,14 @@ _configure_ssh_keys() {
 
 _select_browser() {
 	FIREFOX_DESCRIPTION="Default firefox configuration from mozilla."
-	LIBREWOLF_DESCRIPTION="debloated Mozilla Firefox configuration with an emphasis on
+	LIBREWOLF_DESCRIPTION="Debloated Mozilla Firefox configuration with an emphasis on
 privacy and security."
-	CHROMIUM_DESCRIPTION="open source alternative to google-chrome."
+	CHROMIUM_DESCRIPTION="Open source alternative to google-chrome."
+	BRAVE_DESCRIPTION="Privacy oriented chromium based browser."
 	HELIUM_DESCRIPTION="Debloated chromium based browser designed with 
 simplicity and security in mind."
-	TOR_BROWSER_DESCRIPTION="Firefox based browser officially supported by the tor project
-for use of The Onion Router protocol (TOR)"
+	MULLVAD_BROWSER_DESCRIPTION="Specialized version of firefox based on the tor-browser designed by mullvad.net
+focused on privacy, security, and compatibility with mullvad vpn."
 
 	IFS='|'
 	while :; do
@@ -1386,25 +1393,29 @@ for use of The Onion Router protocol (TOR)"
 			for browser in $SUPPORTED_WEB_BROWSERS; do
 				printf "%s\n" "$browser"
 			done | fzf \
-				--disabled \
 				--border \
-				--border-label-pos 1:bottom \
+				--reverse \
+				--border-label-pos 1:top \
 				--border-label="Pick your favorite web browser" \
 				--preview="
 					case {} in
 					'Firefox') printf '$FIREFOX_DESCRIPTION' ;;
 					'Librewolf') printf '$LIBREWOLF_DESCRIPTION' ;;
 					'Chromium') printf '$CHROMIUM_DESCRIPTION' ;;
+					'Brave') printf '$BRAVE_DESCRIPTION' ;;
 					'Helium') printf '$HELIUM_DESCRIPTION' ;;
-					'Tor-Browser') printf '$TOR_BROWSER_DESCRIPTION' ;;
+					'Mullvad-Browser') printf '$MULLVAD_BROWSER_DESCRIPTION' ;;
+					*) printf 'No web browser will be installed' ;;
 					esac
-				" | tr '[:upper:]' '[:lower:]')"
+				" | tr '[:upper:]' '[:lower:]'
+		)"
 
 		if [ ! "${SELECTED-}" ]; then
 			y_or_n "No browser selected. Try again?" default="yes" || break
 		else
 			case "$SELECTED" in
 			"chromium") WEB_BROWSER="chromium-browser" ;;
+			"none") unset WEB_BROWSER ;;
 			*) WEB_BROWSER="$SELECTED" ;;
 			esac
 			break
@@ -1458,9 +1469,7 @@ while :; do
 			done
 		fi
 
-		if [ "${DESKTOP_ENVIRONMENT-}" ]; then
-			y_or_n "Install a web browser?" default="yes" && _select_browser
-		fi
+		[ "${DESKTOP_ENVIRONMENT-}" ] && _select_browser
 	fi
 
 	while :; do
@@ -1508,7 +1517,7 @@ while :; do
 		y_or_n "Are you satisfied with the current configuration?" default="yes" && break
 		clear
 		OPTIONS="Username|Password|Permissions|Authorized Keys"
-		[ "${WEB_BROWSER-}" ] && OPTIONS="$OPTIONS""|Web Browser"
+		[ "${DESKTOP_ENVIRONMENT-}" ] && OPTIONS="$OPTIONS""|Web Browser"
 		IFS='|'
 		SELECTED="$(
 			for option in $OPTIONS; do

@@ -6,14 +6,11 @@
   gitMinimal,
   bat,
   gnused,
-  nixos-install-tools,
-  nixos-install,
   disko,
   sops,
   age,
   openssh,
   fzf,
-  nvd,
 }:
 writeShellApplication {
   name = "install.sh";
