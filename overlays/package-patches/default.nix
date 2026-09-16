@@ -26,20 +26,6 @@
     };
   });
 
-  # python314 = prev.python314.override {
-  #   packageOverrides = pyfinal: pyprev: {
-  #     sip = pyprev.sip.overrideAttrs (old: {
-  #       patches = [
-  #         (prev.fetchpatch {
-  #           name = "legacy-api-binding-fix.patch";
-  #           url = "https://github.com/Python-SIP/sip/commit/09598895c607f3e41f0249ade217ace0a4da6437.patch";
-  #           hash = "sha256-v0YeHyg0ymB0v32gpVRbMBIUk9U2etjs93VuOGPGg2M=";
-  #         })
-  #       ];
-  #     });
-  #   };
-  # };
-
   # freetube = prev.freetube.overrideAttrs (old: rec {
   #   version = "0.25.3";
   #   src = prev.fetchFromGitHub {
