@@ -163,6 +163,7 @@ _commit_flake_lock() {
 if [ "${GIT_REPO_PRESENT-}" ]; then
 	[ "$WHOAMI" = "$FLAKE_DIR_OWNER" ] || _errormsg "$FLAKE_DIR is not owned by the current user. Git operations cannot continue safely."
 	[ "$(git remote)" ] && REMOTE_PRESENT=1
+	[ "${PERSISTENT-}" ] && _commit_flake_lock
 
 	# attempt to pull any changes from your configured remote to ensure that you are up to date locally
 	if [ "${REMOTE_PRESENT-}" ]; then
@@ -196,7 +197,6 @@ if [ "${GIT_REPO_PRESENT-}" ]; then
 	fi
 
 	if [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ] && [ "${DIRTY_WORKTREE-}" ] && [ "${PERSISTENT-}" ]; then
-		_commit_flake_lock
 		SELECTED_OPTION=$(
 			printf "Commit (recommended)\nStash\nAbort" |
 				fzf \

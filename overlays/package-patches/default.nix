@@ -16,19 +16,15 @@
     };
   });
 
-  python314 = prev.python314.override {
-    packageOverrides = pyfinal: pyprev: {
-      sip = pyprev.sip.overrideAttrs (old: {
-        patches = [
-          (prev.fetchpatch {
-            name = "legacy-api-binding-fix.patch";
-            url = "https://github.com/Python-SIP/sip/commit/09598895c607f3e41f0249ade217ace0a4da6437.patch";
-            hash = "sha256-v0YeHyg0ymB0v32gpVRbMBIUk9U2etjs93VuOGPGg2M=";
-          })
-        ];
-      });
+  ani-cli = prev.ani-cli.overrideAttrs (old: {
+    version = "5.1";
+    src = prev.fetchFromGitHub {
+      owner = "pystardust";
+      repo = "ani-cli";
+      tag = "v5.1";
+      hash = "sha256-lPQA3iO3F/9NS2IziQccsJ3aai6WMQy6YObdB3mDCZA=";
     };
-  };
+  });
 
   # freetube = prev.freetube.overrideAttrs (old: rec {
   #   version = "0.25.3";
