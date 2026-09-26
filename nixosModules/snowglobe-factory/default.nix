@@ -55,6 +55,12 @@ in
     chaotic.nyx.cache.enable = slib.setDefault false;
 
     nix = {
+      # enable the nix garbage collector by default
+      gc = {
+        automatic = slib.setDefault true;
+        dates = slib.setDefault "daily";
+        options = slib.setDefault "--delete-older-than 7d";
+      };
       settings = {
         # allow fallbacks if a substituter is down
         fallback = slib.setDefault true;
@@ -121,7 +127,7 @@ in
     environment = {
       # use dash as /bin/sh of choice
       # override weights are hardcoded into nixpkgs using lib.mkDefault
-      binsh = slib.overrideNixpkgsDefault "${pkgs.dash}/bin/dash";
+      binsh = slib.overrideNixpkgsDefault "${pkgs.yash}/bin/yash";
 
       # these are not set properly on nixos by default for some reason
       # TODO check on status of this: https://github.com/NixOS/nixpkgs/issues/286283
@@ -162,8 +168,6 @@ in
       brightnessctl.enable = slib.setDefault true;
       # many useful unix utilities
       busybox.enable = slib.setDefault true;
-      # drop-in nix replacement with a fancy screen
-      nix-output-monitor.enable = slib.setDefault true;
       # easily search through nixpkgs and try out software without actually installing it persistently
       # use , programname
       nix-index-database = {
@@ -172,15 +176,8 @@ in
       };
       # nix version diff
       nvd.enable = slib.setDefault true;
-      # wrapper around several nixos tools like nom and nvd
-      nh = {
-        enable = slib.setDefault true;
-        flake = slib.setDefault "/etc/nixos";
-        # by default clean contents of the nix-store not related to this machine's nixos config every so often.
-        clean = {
-          enable = slib.setDefault true;
-        };
-      };
+      # nix-output-monitor for more fancy, verbose nix build logging.
+      nix-output-monitor.enable = slib.setDefault true;
       # make obs more beginner friendly
       obs-studio.enableVirtualCamera = slib.setDefault true;
       # declarative disk partitioning tool
@@ -209,8 +206,6 @@ in
       jq.enable = slib.setDefault true;
       # better top
       btop.enable = slib.setDefault true;
-      # improved selectdefaultapplication
-      selectdefaultapplication.package = slib.setDefault pkgs.selectdefaultapplication-qt6;
       # fuzzy finder and manager for systemd units
       sysz.enable = slib.setDefault true;
       # wrapper script for nixos-rebuild

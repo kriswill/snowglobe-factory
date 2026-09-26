@@ -13,59 +13,64 @@ in
 {
   options.snowglobe-factory.desktop = {
     enable = lib.mkEnableOption "snowglobe-factory's modules for systems with a desktop environment";
-    installWaylandDeps = lib.mkEnableOption "wayland tools for desktop.";
+    installWaylandTools = lib.mkEnableOption "wayland tools for desktop.";
   };
 
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
-      (lib.mkIf cfg.installWaylandDeps {
+      # x11 stack
+      (lib.mkIf config.services.xserver.enable {
+        programs = {
+          xclip.enable = true;
+        };
+      })
+
+      # wayland stack
+      (lib.mkIf cfg.installWaylandTools {
         xdg.portal.wlr.enable = slib.setDefault true;
 
         programs = {
           # screenshot & clipboard tools
           grim.enable = slib.setDefault true;
           slurp.enable = slib.setDefault true;
+          # clipboard
           wl-clipboard.enable = slib.setDefault true;
-          # output control cli for wlr-output-management
+          # output control CLI for wlr-output-management
           wlr-randr.enable = slib.setDefault true;
-          # display control gui written in GTK
+          # graphical display control gui written in GTK
           wdisplays.enable = slib.setDefault true;
           # notification daemon for wayland
           swaync = {
             enable = slib.setDefault true;
             systemd.enable = slib.setDefault true;
           };
-          # wayland lockscreen that works with pam-gnupg
-          swaylock.enable = slib.setDefault true;
           # session and application manager for wayland under systemd
+          # Some sessions (like niri) will not use this, but it doesn't hurt to install it anyway
           uwsm.enable = slib.setDefault true;
         };
 
         environment = {
           sessionVariables = {
-            # force electron apps to run using wayland
+            # force electron apps to run using wayland by default
             NIXOS_OZONE_WL = slib.setDefault "1";
-            # fix blank screens with java applications running under xwayland-satellite
-            _JAVA_AWT_WM_NONREPARENTING = slib.setDefault "1";
           };
         };
       })
+      # default configuration for all desktops
       {
-        # add a lightweight display-manager
+        # fix blank screens in most java applications on some window managers.
+        environment.sessionVariables._JAVA_AWT_WM_NONREPARENTING = slib.setDefault "1";
+        # change the default display-manager from lightdm to ly. Runs on tty instead of x11 or wayland compositor.
         services.displayManager.ly.enable = slib.setDefault true;
         # enable polkit
         security.polkit = {
           enable = slib.setDefault true;
         };
-        # add some vpn plugins to network manager
-        networking.networkmanager.plugins = builtins.attrValues {
-          inherit (pkgs)
-            networkmanager-openvpn
-            ;
-        };
+        # add openvpn plugin to networkmanager
+        networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
         # TODO detect if bluetooth hardware exists
-        # enable bluetooth
+        # enable bluetooth by default
         hardware.bluetooth.enable = slib.setDefault true;
         # GTK gui for bluetooth
         services.blueman.enable = slib.setDefault config.hardware.bluetooth.enable;
@@ -80,7 +85,7 @@ in
         # use pipewire for the sound server
         security.rtkit.enable = slib.setDefault true; # hands out realtime scheduling priority to user processes on demand. Improves performance of pulse
         services.pipewire = {
-          # enables alsa, pulseaudio, and jack support by default
+          # enables all backends by default
           enable = slib.setDefault true;
           alsa.enable = slib.setDefault true;
           alsa.support32Bit = slib.setDefault true;
@@ -91,7 +96,7 @@ in
         # prevent xterm from being installed by enabling the xserver
         services.xserver.excludePackages = [ pkgs.xterm ];
 
-        # TODO Decide if we want to enable flatpak by default and automate flathub setup.
+        # enable flatpak for ease of program installation and isolation for less savy users
         services.flatpak.enable = slib.setDefault true;
         services.gnome = {
           # flatpak frontend of choice
@@ -109,16 +114,19 @@ in
           dconf.enable = slib.setDefault true;
           # frontend to manage dconf
           dconf-editor.enable = slib.setDefault config.programs.dconf.enable;
-          # file manager
-          nautilus.enable = slib.setDefault true;
           # media player
           vlc.enable = slib.setDefault true;
-          # lightweight notepad clone
+          # lightweight notepad clone from xfce
           mousepad.enable = slib.setDefault true;
           # GTK management app for fonts icons cursors, etc for independent WMs
-          nwg-look.enable = slib.setDefault true;
-          # volume control for pipewire-pulse
-          pwvucontrol.enable = slib.setDefault (cfgs.pipewire.enable && cfgs.pipewire.pulse.enable);
+          pwvucontrol =
+            let
+              ifPipewirePulse = (cfgs.pipewire.enable && cfgs.pipewire.pulse.enable);
+            in
+            {
+              enable = ifPipewirePulse;
+              pavucontrolAlias = ifPipewirePulse;
+            };
           # calculator app
           gnome-calculator.enable = slib.setDefault true;
           # graphical udisks partition manager
@@ -153,14 +161,6 @@ in
           enable = slib.setDefault true;
           # all xdg-open commands will use the portal configuration by default
           xdgOpenUsePortal = slib.setDefault true;
-          extraPortals = builtins.attrValues {
-            inherit (pkgs)
-              # popular portal for window manager environments
-              xdg-desktop-portal-gtk
-              # allow the user to configure a terminal filechooser (like yazi)
-              xdg-desktop-portal-termfilechooser
-              ;
-          };
         };
 
         hardware.graphics = {

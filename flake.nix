@@ -56,6 +56,9 @@
               inputs.nix-index-database.nixosModules.default
               # provides many rolling release packages
               inputs.chaotic.nixosModules.default
+
+              # inputs.xlibre-overlay.nixosModules.overlay-xlibre-xserver
+              # inputs.xlibre-overlay.nixosModules.overlay-all-xlibre-drivers
             ])
             # secrets storage and key management
             # does not work with import-tree for some reason
@@ -91,11 +94,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    flux = {
-      url = "github:iogamaster/flux";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     jovian-nixos = {
       url = "github:Jovian-Experiments/Jovian-NixOS";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -120,14 +118,15 @@
       inputs.treefmt.follows = "";
     };
 
-    selectdefaultapplication-qt6 = {
-      url = "github:tenshou170/selectdefaultapplication-Qt6";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # TODO currently test driving will add later
+    # xlibre-overlay = {
+    #   url = "git+https://codeberg.org/takagemacoed/xlibre-overlay?ref=dev-26.11";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 }

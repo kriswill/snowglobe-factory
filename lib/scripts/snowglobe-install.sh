@@ -549,7 +549,7 @@ DISKO_CONFIGURATIONS_DIR=${DISKO_CONFIGURATIONS_DIR:-"/etc/disko"}
 # directory which will be scanned for existing hosts
 REPO_DIR=${REPO_DIR:-"/tmp/your-globe"}
 SUPPORTED_DESKTOP_ENVIRONMENTS="KDE|Niri|LabWC|Hyprland|None"
-SUPPORTED_WEB_BROWSERS="Chromium|Helium|Brave|Firefox|Librewolf|Mullvad-Browser|None"
+SUPPORTED_WEB_BROWSERS="Chromium|Helium|Brave|Firefox|Librewolf|Mullvad-Browser|Qutebrowser|None"
 
 CONFIG_ROOT="/mnt/etc/nixos"
 HOSTS_CONFIG_FILE="$CONFIG_ROOT/nixosConfigurations/default.nix"
@@ -1382,6 +1382,8 @@ _select_browser() {
 privacy and security."
 	CHROMIUM_DESCRIPTION="Open source alternative to google-chrome."
 	BRAVE_DESCRIPTION="Privacy oriented chromium based browser."
+	QUTEBROWSER_DESCRIPTION="Vim-style keybind driven browser utilizing qtwebengine as a backend.
+Customizable with python scripts. For enthusists."
 	HELIUM_DESCRIPTION="Debloated chromium based browser designed with 
 simplicity and security in mind."
 	MULLVAD_BROWSER_DESCRIPTION="Specialized version of firefox based on the tor-browser designed by mullvad.net
@@ -1405,6 +1407,7 @@ focused on privacy, security, and compatibility with mullvad vpn."
 					'Brave') printf '$BRAVE_DESCRIPTION' ;;
 					'Helium') printf '$HELIUM_DESCRIPTION' ;;
 					'Mullvad-Browser') printf '$MULLVAD_BROWSER_DESCRIPTION' ;;
+					'Qutebrowser') printf '$QUTEBROWSER_DESCRIPTION' ;;
 					*) printf 'No web browser will be installed' ;;
 					esac
 				" | tr '[:upper:]' '[:lower:]'
@@ -1422,7 +1425,7 @@ focused on privacy, security, and compatibility with mullvad vpn."
 		fi
 	done
 
-	unset IFS SELECTED FIREFOX_DESCRIPTION LIBREWOLF_DESCRIPTION CHROMIUM_DESCRIPTION HELIUM_DESCRIPTION TOR_BROWSER_DESCRIPTION
+	unset IFS SELECTED
 }
 
 _set_permission() {

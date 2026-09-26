@@ -5,6 +5,7 @@
   gitMinimal,
   fzf,
   nvd,
+  nix-output-monitor,
 }:
 writeShellApplication {
   name = "snowglobe-rebuild";
@@ -14,6 +15,7 @@ writeShellApplication {
   runtimeInputs = [
     gitMinimal
     fzf
+    nix-output-monitor
     nvd
   ];
 }
