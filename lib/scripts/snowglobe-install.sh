@@ -1407,6 +1407,7 @@ focused on privacy, security, and compatibility with mullvad vpn."
 				--reverse \
 				--border-label-pos 1:top \
 				--border-label="Pick your favorite web browser" \
+				--preview-window='right,80%,border-left' \
 				--preview="
 					case {} in
 					'Firefox') printf '$FIREFOX_DESCRIPTION' ;;
