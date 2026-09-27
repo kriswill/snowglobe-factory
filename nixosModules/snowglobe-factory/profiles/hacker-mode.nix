@@ -37,7 +37,6 @@ in
           tcpdump.enable = slib.setDefault true;
           metasploit.enable = slib.setDefault true;
           lynx.enable = slib.setDefault true;
-          binsider.enable = slib.setDefault true;
           wireshark.enable = slib.setDefault true;
           traceroute.enable = slib.setDefault true;
           nmap.enable = slib.setDefault true;
@@ -48,6 +47,8 @@ in
           inherit (pkgs)
             binutils
             dnsutils
+            fping
+            hping
             ;
         };
       }

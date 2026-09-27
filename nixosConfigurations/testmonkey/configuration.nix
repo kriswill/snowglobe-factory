@@ -46,7 +46,6 @@ in
     profiles = {
       office.enable = true;
       hacker-mode.enable = true;
-      hardware-tools.enable = true;
       nix-tools.enable = true;
       gaming.enable = true;
     };

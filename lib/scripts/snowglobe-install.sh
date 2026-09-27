@@ -548,7 +548,7 @@ trap '_sigint_cleanup' INT
 DISKO_CONFIGURATIONS_DIR=${DISKO_CONFIGURATIONS_DIR:-"/etc/disko"}
 # directory which will be scanned for existing hosts
 REPO_DIR=${REPO_DIR:-"/tmp/your-globe"}
-SUPPORTED_DESKTOP_ENVIRONMENTS="KDE|Niri|LabWC|Hyprland|None"
+SUPPORTED_DESKTOP_ENVIRONMENTS="XFCE|KDE|Oxwm|LabWC|Niri|Hyprland|None"
 SUPPORTED_WEB_BROWSERS="Chromium|Helium|Brave|Firefox|Librewolf|Mullvad-Browser|Qutebrowser|None"
 
 CONFIG_ROOT="/mnt/etc/nixos"
@@ -687,7 +687,6 @@ _enable_profile() {
 
 _set_optional_profiles() {
 	[ "${OPTIONAL_PROFILES-}" ] && unset OPTIONAL_PROFILES
-	y_or_n "Install programs for hardware diagnostics? (smartmontools, vdpauinfo, mesa-demos, libva-utils, inxi, lshw, etc)" default="no" && _enable_profile "hardware-tools"
 	if [ "${DESKTOP_ENVIRONMENT-}" ]; then
 		y_or_n "Install programs for gaming? (steam, lutris, etc?)" default="no" && _enable_profile "gaming"
 		y_or_n "Install programs for office work? (libreoffice, email client, local CUPS printing server, etc?)" default="no" && _enable_profile "office"
@@ -700,17 +699,24 @@ _set_optional_profiles() {
 _set_desktop_environment() {
 	[ "${DESKTOP_ENVIRONMENT-}" ] && unset DESKTOP_ENVIRONMENT
 
+	XFCE_DESCRIPTION="Modular desktop using gimp toolkit version 3 (gtk3)
+for X11 that allows customization and replaceable components (such as the window manager).
+Great for app compatibility and beginners who wish to branch out."
+
 	KDE_DESCRIPTION="A modern all inclusive desktop environment.
-Very similar to Microsoft Windows 11.
-Perfect for beginners."
+Very similar to Microsoft Windows 11. Good for beginners.
+Pretty heavy on system resources."
+
+	OXWM_DESCRIPTION="Standalone DIY window manager for X11 written by TonyBTW (check him out)
+User friendly version of suckless dwm featuring lua configuration and live-reloading.
+Perfect for enthusists who dislike Wayland adoption."
 
 	LABWC_DESCRIPTION="A very simple and lightweight DIY wayland compositor
 that uses a stacking window layout.
-Ships with the noctalia shell for beginner friendliness."
+Ships with the noctalia V5 shell for beginner friendliness."
 
 	HYPRLAND_DESCRIPTION="A high-quality, modern DIY wayland window manager.
-Uses a traditional dynamic tiling layout
-with an emphasis on visual appearance."
+Uses a traditional dynamic tiling layout with an emphasis on visual appearance."
 
 	NIRI_DESCRIPTION="A high-quality, modern DIY wayland window manager.
 Uses infinite scrolling windows in a tiled format."
@@ -726,10 +732,12 @@ Uses infinite scrolling windows in a tiled format."
 				--reverse \
 				--border-label-pos 1:top \
 				--border-label='Select a desktop environment' \
-				--preview-window 'right,75%,border-left' \
+				--preview-window 'right,85%,border-left' \
 				--preview "
 			case {} in
+				'XFCE') printf '$XFCE_DESCRIPTION' ;;
 				'KDE') printf '$KDE_DESCRIPTION' ;;
+				'Oxwm') printf '$OXWM_DESCRIPTION' ;;
 				'Niri') printf '$NIRI_DESCRIPTION' ;;
 				'LabWC') printf '$LABWC_DESCRIPTION' ;;
 				'Hyprland') printf '$HYPRLAND_DESCRIPTION' ;;

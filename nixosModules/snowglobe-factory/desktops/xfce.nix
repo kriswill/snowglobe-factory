@@ -16,9 +16,18 @@ in
       desktop.enable = true;
       system.hasDesktop = lib.mkForce true;
     };
+    environment.xfce.excludePackages = builtins.attrValues {
+      inherit (pkgs)
+        # prefer vlc as a media player
+        parole
+        ;
+    };
+
     services.xserver = {
       enable = true;
-      desktopManager.xfce.enable = true;
+      desktopManager.xfce = {
+        enable = true;
+      };
     };
   };
 }

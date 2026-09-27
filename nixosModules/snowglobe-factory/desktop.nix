@@ -21,7 +21,10 @@ in
       # x11 stack
       (lib.mkIf config.services.xserver.enable {
         programs = {
-          xclip.enable = true;
+          xclip.enable = slib.setDefault true;
+          xwallpaper.enable = slib.setDefault true;
+          # screenshot tool
+          maim.enable = slib.setDefault true;
         };
       })
 
@@ -75,13 +78,6 @@ in
         # GTK gui for bluetooth
         services.blueman.enable = slib.setDefault config.hardware.bluetooth.enable;
 
-        # TODO does not work under UWSM due to UWSM 26 not passing XDG_SESSION_ID to dbus automatically
-        # This cant be solved from this project without the user adding a hackfix to the desktop's config in the home directory
-        # security.soteria.enable = slib.setDefault true;
-
-        # instead opt to use a hacked together systemd unit for polkit_gnome
-        services.polkit-gnome.enable = slib.setDefault true;
-
         # use pipewire for the sound server
         security.rtkit.enable = slib.setDefault true; # hands out realtime scheduling priority to user processes on demand. Improves performance of pulse
         services.pipewire = {
@@ -98,8 +94,9 @@ in
 
         # enable flatpak for ease of program installation and isolation for less savy users
         services.flatpak.enable = slib.setDefault true;
+
         services.gnome = {
-          # flatpak frontend of choice
+          # flatpak frontend
           gnome-software.enable = slib.setDefault cfgs.flatpak.enable;
           # provide a default secret portal for independent window managers
           gnome-keyring.enable = slib.setDefault true;
@@ -140,12 +137,12 @@ in
             enable = slib.setDefault true;
             systemd.enable = slib.setDefault true;
           };
-          selectdefaultapplication.enable = slib.setDefault true;
           # xdg utilites for desktop shell scripting
           xdg-user-dirs.enable = slib.setDefault true;
           xdg-utils.enable = slib.setDefault true;
         };
 
+        # provide an icon theme
         environment.systemPackages = [ pkgs.adwaita-icon-theme ];
 
         fonts.packages = [

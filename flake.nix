@@ -67,8 +67,6 @@
         };
         # nixos module patches
         nixos = import-tree ./nixosModules/nixos;
-        # jovian configuration
-        jovian = import ./nixosModules/jovian { inherit flake; };
         # expose the modules from nixos-hardware because they do not wrap them with options for some reason
         nixos-hardware = inputs.nixos-hardware.nixosModules;
         default = snowglobe-factory;

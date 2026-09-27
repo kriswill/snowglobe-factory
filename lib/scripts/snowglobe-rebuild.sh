@@ -223,7 +223,10 @@ SCRIPT_TMPDIR="$XDG_RUNTIME_DIR/$SCRIPT_NAME"
 mkdir -p "$SCRIPT_TMPDIR" || _notify "Error" "Failed to create temporary configuration directory."
 cd "$SCRIPT_TMPDIR" || _notify "Error" "Failed to change the working directory to the tmp build directory."
 # build the system and use nix-output-monitor to make the build output prettier
-2>&1 nixos-rebuild build --flake "$FLAKE_DIR#$TARGET_HOST" | nom || _notify "Error" "System build has failed."
+2>&1 nixos-rebuild build --flake "$FLAKE_DIR#$TARGET_HOST" || {
+	_notify "Warning" "System build has failed."
+	kill $$
+} | nom
 # use nvd to get the difference between the current system and the system that was just built.
 # The user can review the configuration differences before authenticating the activation
 CURRENT_GENERATION_NUMBER="$(nixos-rebuild list-generations | grep -v "Generation" | head --lines 1 | cut -d' ' -f1)"

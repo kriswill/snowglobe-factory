@@ -21,6 +21,9 @@ in
       enable = true;
       installWaylandTools = true;
     };
+
+    services.polkit-gnome.enable = slib.setDefault true;
+
     programs = {
       niri = {
         enable = true;
