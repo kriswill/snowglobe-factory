@@ -132,6 +132,10 @@ in
           hardinfo2.enable = slib.setDefault true;
           # secrets daemon frontend for gnome-keyring
           seahorse.enable = slib.setDefault config.services.gnome.gnome-keyring.enable;
+          # image converter
+          switcheroo.enable = slib.setDefault true;
+          # simple video trimmer
+          video-trimmer.enable = slib.setDefault true;
           # low battery notifier for laptops
           batsignal = {
             enable = slib.setDefault true;
@@ -140,6 +144,8 @@ in
           # xdg utilites for desktop shell scripting
           xdg-user-dirs.enable = slib.setDefault true;
           xdg-utils.enable = slib.setDefault true;
+          # good tool that checks if a window is running in x11 or wayland
+          xeyes.enable = slib.setDefault true;
         };
 
         # provide an icon theme

@@ -26,8 +26,6 @@ in
       simple-scan.enable = slib.setDefault true;
       # ftp client
       filezilla.enable = slib.setDefault true;
-      # easily convert image formats
-      switcheroo.enable = slib.setDefault true;
     };
   };
 }

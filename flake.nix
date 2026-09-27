@@ -92,11 +92,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    jovian-nixos = {
-      url = "github:Jovian-Experiments/Jovian-NixOS";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     import-tree = {
       url = "github:vic/import-tree";
     };

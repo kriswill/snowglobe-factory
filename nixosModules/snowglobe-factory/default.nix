@@ -166,8 +166,6 @@ in
       bat.enable = slib.setDefault true;
       # brightness control
       brightnessctl.enable = slib.setDefault true;
-      # many useful unix utilities
-      busybox.enable = slib.setDefault true;
       # easily search through nixpkgs and try out software without actually installing it persistently
       # use , programname
       nix-index-database = {
@@ -229,7 +227,7 @@ in
     };
 
     services = {
-      # run openssh by default
+      # run openssh server by default
       openssh.enable = slib.setDefault true;
     };
   };
