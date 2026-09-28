@@ -31,8 +31,5 @@ rec {
       distro-grub-themes = inputs.distro-grub-themes.packages.${system};
     };
 
-  # overlays from other flakes. These are auto consumed with the modulesets.
-  nix-post-build-hook-queue = inputs.nix-post-build-hook-queue.overlays.default;
-
   default = snowglobe-pkgs;
 }

@@ -50,8 +50,6 @@
               outputs.nixosModules.nixos
               # improved disk partition management
               inputs.disko.nixosModules.default
-              # queue system for nix post-build-hook when uploading to binary caches
-              inputs.nix-post-build-hook-queue.nixosModules.default
               # project providing cli indexing
               inputs.nix-index-database.nixosModules.default
               # provides many rolling release packages
@@ -103,12 +101,6 @@
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-post-build-hook-queue = {
-      url = "github:newam/nix-post-build-hook-queue";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt.follows = "";
     };
 
     sops-nix = {

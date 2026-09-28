@@ -151,27 +151,6 @@
         "type": "github"
       }
     },
-    "nix-post-build-hook-queue": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt": []
-      },
-      "locked": {
-        "lastModified": 1790427743,
-        "narHash": "sha256-2wXSkWbPnz2G7LYJtbnOuqS6LMHyf7YioZCCTFBUj8w=",
-        "owner": "newam",
-        "repo": "nix-post-build-hook-queue",
-        "rev": "9b051ff6421ad90a31b7ebfc7bbf765b9ee5f0d1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "newam",
-        "repo": "nix-post-build-hook-queue",
-        "type": "github"
-      }
-    },
     "nixos-hardware": {
       "locked": {
         "lastModified": 1761824787,
@@ -225,7 +204,6 @@
         "distro-grub-themes": "distro-grub-themes",
         "import-tree": "import-tree",
         "nix-index-database": "nix-index-database",
-        "nix-post-build-hook-queue": "nix-post-build-hook-queue",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixpkgs-stable": "nixpkgs-stable",
