@@ -84,8 +84,6 @@ in
     programs = {
       # disable pwvucontrol in favor of the default plasma volume control
       pwvucontrol.enable = slib.overrideDefault false;
-      # disable batsignal
-      batsignal.enable = slib.overrideDefault false;
       # kde has its own notepad
       mousepad.enable = slib.overrideDefault false;
       # disable gnome-disks in favor of kde-partition-manager

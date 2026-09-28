@@ -121,8 +121,8 @@ in
               ifPipewirePulse = (cfgs.pipewire.enable && cfgs.pipewire.pulse.enable);
             in
             {
-              enable = ifPipewirePulse;
-              pavucontrolAlias = ifPipewirePulse;
+              enable = slib.setDefault ifPipewirePulse;
+              pavucontrolAlias = slib.setDefault ifPipewirePulse;
             };
           # calculator app
           gnome-calculator.enable = slib.setDefault true;
@@ -136,11 +136,6 @@ in
           switcheroo.enable = slib.setDefault true;
           # simple video trimmer
           video-trimmer.enable = slib.setDefault true;
-          # low battery notifier for laptops
-          batsignal = {
-            enable = slib.setDefault true;
-            systemd.enable = slib.setDefault true;
-          };
           # xdg utilites for desktop shell scripting
           xdg-user-dirs.enable = slib.setDefault true;
           xdg-utils.enable = slib.setDefault true;
