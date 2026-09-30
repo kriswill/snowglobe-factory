@@ -75,6 +75,7 @@ in
       displayManager.ly.enable = false;
       displayManager.sddm.enable = true;
 
+      # disable gnome servcies by default
       gnome = {
         gnome-keyring.enable = slib.overrideDefault false;
         gnome-software.enable = slib.overrideDefault false;
@@ -89,8 +90,8 @@ in
       # disable gnome-disks in favor of kde-partition-manager
       gnome-disks.enable = slib.overrideDefault false;
       partition-manager.enable = slib.setDefault true;
-      # prevent 2 network manager applets
-      networkmanagerapplet.enable = slib.overrideDefault false;
+      # prevent 2 network manager applets since kde provides its own
+      nm-applet.enable = slib.overrideDefault false;
     };
   };
 }

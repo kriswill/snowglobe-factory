@@ -104,7 +104,7 @@ in
 
         programs = {
           # control applet for networkmanager
-          networkmanagerapplet.enable = slib.setDefault true;
+          nm-applet.enable = slib.setDefault true;
           # notification daemon api
           notify-send.enable = slib.setDefault true;
           # gtk and gnome software database
