@@ -101,6 +101,8 @@ Can be reverted with `users.defaultUserShell`
 
 **Configurations for popular desktops** - Installs programs used by the default configurations of popular window managers.
 
+**ly display-manager** - A TTY based display-manager that is even more lightweight than lightdm.
+
 **Flatpak for desktops** - If a desktop is chosen during installation, the flatpak service will be installed and configured by default so users can imperatively install apps independently of nix.
 
 **Debloater for headless systems** - Remove some fluff that nixos enables by default if no desktop environment is installed.
@@ -114,6 +116,13 @@ Can be reverted with `users.defaultUserShell`
 **Dash as /bin/sh** - Use the smallest and fastest posix-compliant shell for scripts that call directly with #!/bin/sh
 
 **Firewall configuration** - Firewall is enabled by default and disables ICMP packets.
+
+**Choatic nyx overlay** - Provides the CachyOS kernel configuration `pkgs.linuxPackages_cachyos` for those who want to use it.
+
+**Nix-index-database and comma** - Installs the following CLI tools:
+- nix-locate - locates libraries or program binaries in nixpkgs.
+- nix-index-database - Updates the database
+- , - literally just a comma. Searches the database for a program binary within nixpkgs from the provided name and runs it.
 
 **nix functions**
 mkProgramOption - creates a program option, allowing you to use the wrapper for programs that may not be included in the base repo.
