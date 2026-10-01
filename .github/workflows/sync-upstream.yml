@@ -3,8 +3,15 @@
 # this workflow file survive each sync — scheduled workflows only run from
 # the default branch, so overwriting main would delete the workflow and
 # stop the syncing, and unstable carries local commits not yet upstream.
-# Caveat: if upstream ever rebases unstable, the merge here will conflict
-# and the job will fail — resolve by manually resetting the branch.
+#
+# The upstream tip each branch was last synced to is recorded in
+# refs/upstream-sync/<branch>. If upstream force-pushes so that tip is no
+# longer in its history, merging would resurrect the dropped commits and
+# conflict, so instead the branch is rebuilt: local commits made since the
+# last sync are rebased onto the new upstream and the branch is force-pushed
+# (local clones then need `git reset --hard origin/<branch>`). A rebuild of
+# main may be refused by GitHub, since GITHUB_TOKEN can't push commits that
+# touch workflow files; that and any conflict still need a manual fix.
 name: Sync main from Codeberg upstream
 
 on:
@@ -27,18 +34,39 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Merge upstream/main and push
+      - name: Sync main and unstable from upstream
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://codeberg.org/EarthGman/snowglobe-factory.git
-          git fetch upstream main
-          git merge --no-edit upstream/main
-          git push origin main
+          git fetch upstream main unstable
+          git fetch origin '+refs/upstream-sync/*:refs/upstream-sync/*'
 
-      - name: Merge upstream/unstable and push
-        run: |
-          git fetch upstream unstable
-          git checkout -B unstable origin/unstable
-          git merge --no-edit upstream/unstable
-          git push origin unstable
+          sync() {
+            local branch=$1 tip up last
+            tip=$(git rev-parse "origin/$branch")
+            up=$(git rev-parse "upstream/$branch")
+            # first run has no record yet; the merge-base is right as long as
+            # upstream hasn't been rewritten since the last merge
+            last=$(git rev-parse -q --verify "refs/upstream-sync/$branch" || git merge-base "$tip" "$up")
+            git checkout -q -B "$branch" "$tip"
+
+            if git merge-base --is-ancestor "$last" "$up"; then
+              git merge --no-edit "upstream/$branch" || {
+                echo "::error::merging upstream/$branch conflicts with local commits"
+                exit 1
+              }
+              git push --atomic origin "$branch" "$up:refs/upstream-sync/$branch"
+            else
+              echo "::warning::upstream rewrote $branch; rebasing local commits onto it"
+              git rebase --onto "upstream/$branch" "$last" || {
+                echo "::error::local commits on $branch don't rebase cleanly onto rewritten upstream"
+                exit 1
+              }
+              git log --oneline "upstream/$branch..$branch"
+              git push --atomic --force-with-lease="$branch:$tip" origin "$branch" "+$up:refs/upstream-sync/$branch"
+            fi
+          }
+
+          sync main
+          sync unstable
