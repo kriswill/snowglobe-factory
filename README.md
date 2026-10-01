@@ -1,7 +1,7 @@
 # Snowglobe Factory - A NixOS fleet generator and manager
 
-This repository contains my NixOS modules, custom package patches, and automation scripts that aim to improve upon NixOS and make the distribution accessible to more people.
-It currently drives [My dotfiles](https://codeberg.org/earthgman/dotfiles) and several hosts operated by friends and family.
+This repository contains my shareable NixOS modules, custom package patches, and automation scripts that aim to improve upon NixOS and make the distribution accessible to more people.
+It currently daily drives [my workstations and servers](https://codeberg.org/earthgman/dotfiles) and several hosts operated by friends and family.
 
 It is designed for x86_64 AMD/Intel systems built for desktop use or homelab servers.
 
@@ -9,6 +9,9 @@ Whether you are an experienced NixOS user, a distro hopper looking for the best 
 
 
 # What you get
+
+**Guided Installation** - I don't expect you to be a NixOS, or Linux expert to install or use your computer.
+The installation script ensures that users receive both a secure and functional system when choosing the default answers to the provided questions.
 
 
 **Flakes by default** - Unlike vanilla NixOS, this project enables and utilizes nix flakes for managing your nix modules and NixOS configurations.
@@ -36,19 +39,20 @@ For the programs that I commonly use, I provide quick updates for them using an 
 
 **Configuration integrity tests** - This project uses the nixos-unstable branch of nixpkgs for up-to-date packages.
 Updating nixos-unstable can result in a package that your configuration depends on failing to build, thus you are unable to update and your Saturday is ruined.
-During the weekly flake update, the CI script will attempt to build all programs and configurations currently registered with the build system.
-This allows me to provide fixes for the failing package builds before pushing the flake update, ensuring that the end users never have to deal with it.
+During the weekly flake update, the CI script will attempt to build all programs and NixOS configurations currently registered with the build system.
+The configurations tested include all supported FOSS program options, desktop environments, and the wide variety of NixOS configurations from friends and family.
+I can then provide fixes for the failing package builds from nixpkgs using an overlay before releasing an update.
+This ensures that users receive up-to-date packages and never have to deal with update failures.
 
 
 **Persistent ssh host keys** - With sops-nix and the `envionment.etc` option, the installer ensures that the openssh keypair for this host stays persistent across reinstallations.
-These keys are also linked to /root/.ssh, which results in the root user having the same key-pairs as the host. This can be useful for automation like uploading build artifacts to a cache server.
+These keys are also linked to /root/.ssh, which allows the root user to use the same key-pairs as the host. This can be useful for automation like uploading build artifacts to a cache server.
 
 
-**Optional Cache** - Custom package configurations from this repo and any of its resulting configurations that are registered into the configuration integrity checker
-will have their configurations built and cached at https://nix-store.earthgman.dev.
+**Optional Cache** - Custom packages and overlays from this repo are built and cached at https://nix-store.earthgman.dev.
 
 
-**extra binary caches configuration module** - Allows users to easily enable/disable and customize extra nix binary caches.
+**extra binary caches configuration module** - Allows users to easily enable/disable and customize extra nix binary caches in one place.
 Usage Example:
 ```nix
 substituters = {
@@ -127,6 +131,7 @@ Can be reverted with `users.defaultUserShell = pkgs.bash`
 
 
 **Flatpak for desktops** - If a desktop is chosen during installation, the flatpak service will be installed and configured by default so users can imperatively install apps independently of nix.
+This can be disabled with `services.flatpak.enable = false`
 
 
 **Debloater for headless systems** - Remove some fluff that NixOS enables by default if no desktop environment is installed.
@@ -144,25 +149,25 @@ Can be reverted with `users.defaultUserShell = pkgs.bash`
 **Optional CUPS printing configuration** - Setting `snowglobe-factory.cups.enable = true` provides a printing server with FOSS drivers installed. It is enabled automatically by the office profile.
 
 
-**Dash as /bin/sh** - Use the smallest and fastest posix-compliant shell for scripts that call #!/bin/sh directly
+**Dash as /bin/sh** - Use the smallest and fastest posix-compliant shell for scripts that call #!/bin/sh directly.
 
 
-**Firewall configuration** - Firewall is enabled by default and disables ICMP packets.
+**Firewall** - The system has a firewall enabled by default that disables replies to ICMP packets.
 
 
-**Choatic nyx overlay** - Provides the CachyOS kernel configuration `pkgs.linuxPackages_cachyos` for those who want to use it.
+**Choatic nyx overlay** - Provides additional goodies from [chaotic nyx](https://www.nyx.chaotic.cx/) including the CachyOS kernel configuration `pkgs.linuxPackages_cachyos` for those who want to use it.
 
 
 **Nix-index-database and comma** - Installs the following CLI tools:
-- nix-locate - locates libraries or program binaries in nixpkgs.
-- nix-index-database - Updates the database
+- nix-locate - locates libraries or program binaries in nixpkgs from your terminal instead of a web-browser.
+- nix-index-database - Updates the database.
 - , - literally just a comma. Searches the database for a program binary within nixpkgs from the provided name and runs it.
 
 
 **nix functions**
 - mkProgramOption - creates a program option, allowing you to use the wrapper for programs that may not be included in the base repo.
 - installProgram - used to implement the defined program options from mkProgramOption.
-- mkGraphicalService - used to create systemd service configurations bound to graphical-session.target. Used by programs that users may wish to run as a desktop service.
+- mkGraphicalService - creates systemd service configurations bound to graphical-session.target. Used by programs that users may wish to run as a desktop service.
 - mkNixosHost - wrapper for lib.nixosSystem that provides a pretty overview of your hosts's hardware characteristics. It is responsible for enabling this projects modules and overlays for a given host.
 
 
@@ -172,7 +177,7 @@ If you have never used NixOS before, the easiest installation method would be to
 https://www.earthgman.dev/assets/snowglobe-installers/
 
 - Images suffixed with -small do not contain firmware blobs from linux-firmware so they are smaller, but cannot be used with all systems.
-- Images suffixed with -untrusted will ensure that the binary cache: nix-store.earthgman.dev is disabled at all times.
+- Images suffixed with -untrusted will ensure that the binary cache, nix-store.earthgman.dev, is disabled at all times.
 
 Download the iso corresponding to your use case.
 You can then use `dd` from a shell or a graphical application like rufus or balena-etcher to burn the image to a USB stick.
@@ -190,11 +195,11 @@ If you already have a nix flake, you can consume the modules directly.
 inputs = {
   snowglobe-factory = {
     url = "git+https://codeberg.org/earthgman/snowglobe-factory";
-    # Add if you choose to use your own nixpkgs revision.
+    # Add only if you choose to use your own nixpkgs revision.
     # inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  # OPTIONAL: make your nixpkgs revision follow the framework for improved reliability
+  # OPTIONAL: pin your nixpkgs revision to the framework for improved reliability
   nixpkgs.follows = "snowglobe-factory/nixpkgs";
 };
 
@@ -221,6 +226,7 @@ outputs = { nixpkgs, snowglobe-factory, ... }: {
     };
 
     # option 2 - using the provided lib.nixosSystem wrapper
+    # automatically enables the modules and applies overlays
     your-other-host = slib.mkNixosHost {
       hostname = "your-other-host";
       firmware = "UEFI";                                 # or BIOS for older systems (< 2009)
@@ -233,7 +239,7 @@ outputs = { nixpkgs, snowglobe-factory, ... }: {
       specialArgs = {  };                                # pass any extra args to modules
 
       # Note: configDir imports and handles any .nix file present in the specified directory.
-      modules = [  ]                                     # pass modules from flake inputs or flake outputs
+      modules = [  ];                                    # pass modules from flake inputs or flake outputs
     };
   };
 }
