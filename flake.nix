@@ -52,8 +52,6 @@
               inputs.disko.nixosModules.default
               # project providing cli indexing
               inputs.nix-index-database.nixosModules.default
-              # provides many rolling release packages
-              inputs.chaotic.nixosModules.default
 
               # inputs.xlibre-overlay.nixosModules.overlay-xlibre-xserver
               # inputs.xlibre-overlay.nixosModules.overlay-all-xlibre-drivers
@@ -74,11 +72,6 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:/nixos/nixpkgs/nixos-26.05";
-
-    chaotic = {
-      url = "github:chaotic-cx/nyx";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     disko = {
       url = "github:nix-community/disko";
