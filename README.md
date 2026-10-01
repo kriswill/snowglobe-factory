@@ -156,9 +156,6 @@ This can be disabled with `services.flatpak.enable = false`
 **Firewall** - The system has a firewall enabled by default that disables replies to ICMP packets.
 
 
-**Choatic nyx overlay** - Provides additional goodies from [chaotic nyx](https://www.nyx.chaotic.cx/) including the CachyOS kernel configuration `pkgs.linuxPackages_cachyos` for those who want to use it.
-
-
 **Nix-index-database and comma** - Installs the following CLI tools:
 - nix-locate - locates libraries or program binaries in nixpkgs from your terminal instead of a web-browser.
 - nix-index-database - Updates the database.
