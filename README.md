@@ -100,9 +100,9 @@ programs.neovim = {
 
 **Configuration update helper** - Using `programs.snowglobe-rebuild.enable` (enabled by default) will provide a wrapper for `nixos-rebuild` invoked with `snowglobe-rebuild` that assists with managing your NixOS generations.
 It integrates with the following tools:
-- nix-output-monitor - gives you a pretty view of the build process.
-- systemd run0 - a secure suid-less privilege elevation program that integrates with your desktop's configured polkit agent.
-- nvd - writes all closure changes for each NixOS generation including package additions, removals, version changes, and disk usage to a log file in your repository.
+- [nix-output-monitor](https://github.com/maralorn/nix-output-monitor) - gives you a pretty view of the build process.
+- [systemd run0](https://wiki.archlinux.org/title/Systemd/run0) - a secure suid-less privilege elevation program that integrates with your desktop's configured polkit agent.
+- [nvd](https://khumba.net/projects/nvd/) - writes all closure changes for each NixOS generation including package additions, removals, version changes, and disk usage to a log file in your repository.
 - git - automatically attempts to pull your remote repository, creates commits for flake.lock updates, and reminds you to commit changes before adding a new generation to your bootloader.
 
 
@@ -113,15 +113,16 @@ Warning: Nvidia GPUs have not been thoroughly tested.
 
 
 **Optional Profiles** - Several optional profiles are provided during the installation process based on the user's needs.
-Office - Install libreoffice, thunderbird email client, and a preconfigured CUPS printing server with common FOSS printing drivers already available.
-Hacker Mode - Installs many tools from Kali Linux like wireshark, tor-browser, nmap and zenmap, ghidra, metasploit and more.
-Gaming - Installs and configures Steam, lutris, and proton/wine management utilities.
-Nix Tools - Install and configure tools for working with projects using nix (like direnv).
-Harden - Provides a hardened configuration for public facing servers. Disables mutable users and prevents SSH password login by default.
+- Office - Install libreoffice, thunderbird email client, and a preconfigured CUPS printing server with common FOSS printing drivers already available.
+- Hacker Mode - Installs many tools from Kali Linux like wireshark, tor-browser, nmap and zenmap, ghidra, metasploit and more.
+- Gaming - Installs and configures Steam, lutris, and proton/wine management utilities.
+- Nix Tools - Install and configure tools for working with projects using nix (like direnv).
+- Harden - Provides a hardened configuration for public facing servers. Disables mutable users and prevents SSH password login by default.
 
 
 **Zsh instead of bash** - zsh with syntax highlighting and autosuggestion plugins enabled by default.
-Can be reverted with `users.defaultUserShell = pkgs.bash`
+Can be reverted with:
+`users.defaultUserShell = pkgs.bash`
 
 
 **Configurations for popular desktops** - Installs programs used by the default configurations of popular desktops and window managers.
