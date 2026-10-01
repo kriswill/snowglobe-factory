@@ -230,7 +230,7 @@ cd "$SCRIPT_TMPDIR" || _notify "Error" "Failed to change the working directory t
 # The user can review the configuration differences before authenticating the activation
 CURRENT_GENERATION_NUMBER="$(nixos-rebuild list-generations | grep -v "Generation" | head --lines 1 | cut -d' ' -f1)"
 [ "${CURRENT_GENERATION_NUMBER-}" ] || _notify "Error" "Failed to obtain the current generation number."
-NVD_DIFF="$(nvd diff /nix/var/nix/profiles/system-"$CURRENT_GENERATION_NUMBER"-link result)"
+NVD_DIFF="$(nvd --color auto diff /nix/var/nix/profiles/system-"$CURRENT_GENERATION_NUMBER"-link result)"
 
 cd "$FLAKE_DIR" || _notify "Error" "Failed to change working directory to $FLAKE_DIR"
 

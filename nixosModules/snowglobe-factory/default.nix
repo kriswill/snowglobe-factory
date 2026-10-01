@@ -51,9 +51,6 @@ in
       };
     };
 
-    # disable choatic nyx cache by default
-    chaotic.nyx.cache.enable = slib.setDefault false;
-
     nix = {
       # enable the nix garbage collector by default
       gc = {
