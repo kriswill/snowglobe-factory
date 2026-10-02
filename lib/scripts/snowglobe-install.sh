@@ -443,12 +443,10 @@ _install_existing() {
 		done
 	fi
 
-	if [ -e "$CONFIG_ROOT" ]; then
-		rm -rf "$CONFIG_ROOT"
-	fi
-	mkdir -p "$CONFIG_ROOT"
+	[ -e "$CONFIG_ROOT" ] && rm -rf "$CONFIG_ROOT"
+	mkdir -p "/etc/nixos"
+	cp -rf "$REPO_DIR" "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
 
-	cp -rf "$REPO_DIR"/* "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
 	_get_nixos_hardware_config
 
 	# modify the arguments to the mkNixosHost function to reflect the host's current hardware state
@@ -600,9 +598,11 @@ if [ -d "${CONFIG_ROOT}" ]; then
 	rm -rf "$CONFIG_ROOT" || _errormsg "Failed to remove $CONFIG_ROOT"
 fi
 
-mkdir -p "$CONFIG_ROOT" || _errormsg "Failed to create $CONFIG_ROOT"
 if [ "${REPO_DIR-}" ] && [ "${INSTALLATION_METHOD}" = "integrate" ]; then
-	cp -rf "$REPO_DIR"/* "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
+	mkdir -p "/mnt/etc" || _errormsg "Failed to create /mnt/etc"
+	cp -rf "$REPO_DIR" "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
+else
+	mkdir -p "$CONFIG_ROOT" || _errormsg "Failed to create $CONFIG_ROOT"
 fi
 
 _set_hostname() {
