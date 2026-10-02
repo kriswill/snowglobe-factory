@@ -276,7 +276,7 @@ if [ "${PERSISTENT-}" ]; then
 		TMP_LOGFILE="$SCRIPT_RUNTIME_DIR/system-update.log"
 		UPDATE_MSG="$(
 			printf "%s\nHost: %s\nKernel - %s\n%s\n" \
-				"$TIMESTAMP" "$TARGET_HOST" "$KERNEL_VERSION" "$(cat "$NVD_DIFF_FILE")"
+				"$TIMESTAMP" "$TARGET_HOST" "$KERNEL_VERSION" "$NVD_DIFF"
 		)"
 		printf "%s\n\n" "$UPDATE_MSG" | cat - "$UPDATE_LOG_FILE" >"$TMP_LOGFILE" || _notify "Error" "Could not write to temporary log file $TMP_LOGFILE"
 		if [ "$WHOAMI" = "$FLAKE_DIR_OWNER" ]; then
