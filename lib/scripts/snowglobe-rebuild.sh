@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # wrapper around nixos-rebuild, ensuring configurations are automaically logged and commited to git
 set -u
 set -o pipefail
@@ -70,15 +72,16 @@ _notify() {
 case "$1" in
 "help" | "--help")
 	printf "Wrapper around nixos-rebuild that automatically tracks your configuration changes through git.\n"
-	printf "Usage: $SCRIPT_NAME [options]\n\n"
+	printf "Usage: $SCRIPT_NAME [options]\n"
 
-	printf "Options are directly passed to nixos-rebuild.\n"
+	printf "\nOptions are directly passed to nixos-rebuild.\n"
 	printf "to see them use: man nixos-rebuild or 'nixos-rebuild --help'\n"
 
-	printf "Variables:\n"
+	printf "\nEnvironment:\n"
 	printf "  FLAKE_DIR: Configured by --flake. Defaults to /etc/nixos.\n"
 	printf "  ELEVATION_PROGRAM: Configured by --elevate. Defaults to run0.\n"
 	printf "  DONT_NOTIFY: Set to any value (example DONT_NOTIFY=1) to prevent notification spam for desktop environments if notify-send is installed.\n"
+	printf "  IGNORE_GIT_SYNCHRONIZATION set to any value to disable git synchronization checks.\n"
 	exit 0
 	;;
 "test") NEEDS_PRIVILEGES=1 ;;
@@ -149,7 +152,7 @@ _commit_flake_lock() {
 	fi
 }
 
-if [ "${GIT_REPO_PRESENT-}" ]; then
+if [ "${GIT_REPO_PRESENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
 	# bail if flake directory is not owned by the current user.
 	# TODO I dont really like this behavior in very specific situations but it should be fine for now.
 	[ "$WHOAMI" = "$FLAKE_DIR_OWNER" ] || _notify "Error" "$FLAKE_DIR is not owned by the current user invoking $SCRIPT_NAME. Git operations cannot continue safely."
@@ -175,6 +178,7 @@ if [ "${GIT_REPO_PRESENT-}" ]; then
 				if git pull --rebase; then
 					_restore_git_stash
 				else
+					_restore_git_stash
 					_notify "Error" "Could not pull with rebase"
 				fi
 			fi
@@ -221,35 +225,40 @@ fi
 [ "${TARGET_HOST-}" ] || _notify "Error" "Failed to retrieve hostname from /etc/hostname."
 
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}"
-SCRIPT_TMPDIR="$XDG_RUNTIME_DIR/$SCRIPT_NAME"
-mkdir -p "$SCRIPT_TMPDIR" || _notify "Error" "Failed to create temporary configuration directory."
-cd "$SCRIPT_TMPDIR" || _notify "Error" "Failed to change the working directory to the tmp build directory."
-# build the system and use nix-output-monitor to make the build output prettier
-2>&1 nixos-rebuild build --flake "$FLAKE_DIR#$TARGET_HOST" | nom || _notify "Error" "System failed to build."
-# use nvd to get the difference between the current system and the system that was just built.
-# The user can review the configuration differences before authenticating the activation
-CURRENT_GENERATION_NUMBER="$(nixos-rebuild list-generations | grep -v "Generation" | head --lines 1 | cut -d' ' -f1)"
-[ "${CURRENT_GENERATION_NUMBER-}" ] || _notify "Error" "Failed to obtain the current generation number."
-NVD_DIFF="$(nvd --color auto diff /nix/var/nix/profiles/system-"$CURRENT_GENERATION_NUMBER"-link result)"
+SCRIPT_RUNTIME_DIR="$XDG_RUNTIME_DIR/$SCRIPT_NAME"
+mkdir -p "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to create temporary configuration directory."
 
-cd "$FLAKE_DIR" || _notify "Error" "Failed to change working directory to $FLAKE_DIR"
+case "$1" in
+"switch" | "test" | "boot")
+	cd "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to change the working directory to $SCRIPT_RUNTIME_DIR."
+	# build the system and use nix-output-monitor to make the build output prettier
+	# note: pipefail must be set for this to work properly
+	2>&1 nixos-rebuild build --flake "$FLAKE_DIR#$TARGET_HOST" | nom || _notify "Error" "System failed to build."
+	# use nvd to get the difference between the current system and the system that was just built.
+	# The user can review the configuration differences before authenticating the activation
+	CURRENT_GENERATION_NUMBER="$(nixos-rebuild list-generations | grep -v "Generation" | head --lines 1 | cut -d' ' -f1)"
+	[ "${CURRENT_GENERATION_NUMBER-}" ] || _notify "Error" "Failed to obtain the current generation number."
 
-printf "%s\n\n" "$NVD_DIFF"
-_notify "Success" "Nixos system build is complete. Review the changes and authenticate to continue."
-y_or_n "Continue?" || _errormsg "Aborted"
+	# TODO figure out how to get color output.
+	NVD_DIFF="$(nvd diff /nix/var/nix/profiles/system-"$CURRENT_GENERATION_NUMBER"-link result)"
+	printf "%s\n\n" "$NVD_DIFF"
+	[ "${NVD_DIFF-}" ] || _notify "Error" "Failed to retrieve the nvd diff for this generation."
 
-# now we can apply the configuration using the flags that the program was invoked with
+	cd "$FLAKE_DIR" || _notify "Error" "Failed to return working directory to $FLAKE_DIR"
+
+	_notify "Success" "Nixos system build is complete. Review the changes and authenticate to continue."
+	y_or_n "Continue?" || _errormsg "Aborted"
+	;;
+esac
+
 if [ "${NEEDS_PRIVILEGES-}" ]; then
-	$ELEVATION_PROGRAM nixos-rebuild "$@" || _notify "Error" "Failed to apply the configuration using nixos-rebuild"
+	$ELEVATION_PROGRAM nixos-rebuild "$@" || _notify "Error" "nixos-rebuild exited with errors"
 else
-	nixos-rebuild "$@" || _notify "Error" "Failed to apply the configuration using nixos-rebuild"
+	nixos-rebuild "$@" || _notify "Error" "nixos-rebuild exited with errors"
 fi
 
 if [ "${PERSISTENT-}" ]; then
-	# check if the flake was updated and commit it
 	[ "${GIT_REPO_PRESENT-}" ] && _commit_flake_lock
-	# keep a log file of your system updates
-	# this log uses a tool 'nvd' to display all package changes
 	if [ ! -e "$UPDATE_LOG_FILE" ]; then
 		touch "$UPDATE_LOG_FILE" >/dev/null 2>&1 || $ELEVATION_PROGRAM touch "$UPDATE_LOG_FILE"
 	fi
@@ -264,10 +273,10 @@ if [ "${PERSISTENT-}" ]; then
 	[ "${GENERATION-}" = "${PREVIOUS_GENERATION-}" ] && unset LOG
 
 	if [ "${LOG-}" ]; then
-		TMP_LOGFILE="$SCRIPT_TMPDIR/system-update.log"
+		TMP_LOGFILE="$SCRIPT_RUNTIME_DIR/system-update.log"
 		UPDATE_MSG="$(
 			printf "%s\nHost: %s\nKernel - %s\n%s\n" \
-				"$TIMESTAMP" "$TARGET_HOST" "$KERNEL_VERSION" "$NVD_DIFF"
+				"$TIMESTAMP" "$TARGET_HOST" "$KERNEL_VERSION" "$(cat "$NVD_DIFF_FILE")"
 		)"
 		printf "%s\n\n" "$UPDATE_MSG" | cat - "$UPDATE_LOG_FILE" >"$TMP_LOGFILE" || _notify "Error" "Could not write to temporary log file $TMP_LOGFILE"
 		if [ "$WHOAMI" = "$FLAKE_DIR_OWNER" ]; then
