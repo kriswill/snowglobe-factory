@@ -14,14 +14,9 @@ in
   stateVersion ? "26.11", # initial release of nixos which this machine was installed
   system ? "x86_64-linux", # target cpu architecture
   modules ? [ ], # send extra modules to the function
-  nixImplementation ? "lix", # which implementation of nix to use: nix for cppnix, or lix
   specialArgs ? { }, # send extra special arguments to the function
   configDir ? null,
 }:
-let
-  pkgs = inputs.nixpkgs.legacyPackages.${system};
-  lix-stable = pkgs.lixPackageSets.stable.lix;
-in
 lib.nixosSystem {
   inherit system; # used for legacy nixos < 22.05, but it doesn't hurt to have it here
   inherit specialArgs;
@@ -39,7 +34,6 @@ lib.nixosSystem {
         # set secrets file
         sops.defaultSopsFile = lib.mkIf configDirExists (slib.setDefault "${configDir}/secrets.yaml");
 
-        # populate system options with hardware specific config
         system = {
           inherit stateVersion;
         };
@@ -52,25 +46,6 @@ lib.nixosSystem {
             firmware
             ;
         };
-
-        assertions = [
-          {
-            assertion = (nixImplementation == "nix" || nixImplementation == "lix");
-            message = "slib.mkNixosHost: nixImplementation must be one of 'nix', 'lix', or 'lix-main'";
-          }
-        ];
-      }
-    ]
-    # if 'nix' then do nothing
-    ++ lib.optionals (nixImplementation == "lix") [
-      {
-        # replace 'nix' in nixpkgs to be lix via overlay so all tooling will be compatible with it.
-        nix.package = lix-stable;
-        nixpkgs.overlays = [
-          (final: prev: {
-            nix = lix-stable;
-          })
-        ];
       }
     ]
     ++ [ hostConfig ]

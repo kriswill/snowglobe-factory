@@ -443,12 +443,10 @@ _install_existing() {
 		done
 	fi
 
-	if [ -e "$CONFIG_ROOT" ]; then
-		rm -rf "$CONFIG_ROOT"
-	fi
-	mkdir -p "$CONFIG_ROOT"
+	[ -e "$CONFIG_ROOT" ] && rm -rf "$CONFIG_ROOT"
+	mkdir -p "/etc/nixos"
+	cp -rf "$REPO_DIR" "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
 
-	cp -rf "$REPO_DIR"/* "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
 	_get_nixos_hardware_config
 
 	# modify the arguments to the mkNixosHost function to reflect the host's current hardware state
@@ -548,8 +546,8 @@ trap '_sigint_cleanup' INT
 DISKO_CONFIGURATIONS_DIR=${DISKO_CONFIGURATIONS_DIR:-"/etc/disko"}
 # directory which will be scanned for existing hosts
 REPO_DIR=${REPO_DIR:-"/tmp/your-globe"}
-SUPPORTED_DESKTOP_ENVIRONMENTS="KDE|Niri|LabWC|Hyprland|None"
-SUPPORTED_WEB_BROWSERS="Chromium|Helium|Brave|Firefox|Librewolf|Mullvad-Browser|None"
+SUPPORTED_DESKTOP_ENVIRONMENTS="XFCE|KDE|Oxwm|LabWC|Niri|Hyprland|None"
+SUPPORTED_WEB_BROWSERS="Chromium|Helium|Brave|Firefox|Librewolf|Mullvad-Browser|Qutebrowser|None"
 
 CONFIG_ROOT="/mnt/etc/nixos"
 HOSTS_CONFIG_FILE="$CONFIG_ROOT/nixosConfigurations/default.nix"
@@ -600,9 +598,11 @@ if [ -d "${CONFIG_ROOT}" ]; then
 	rm -rf "$CONFIG_ROOT" || _errormsg "Failed to remove $CONFIG_ROOT"
 fi
 
-mkdir -p "$CONFIG_ROOT" || _errormsg "Failed to create $CONFIG_ROOT"
 if [ "${REPO_DIR-}" ] && [ "${INSTALLATION_METHOD}" = "integrate" ]; then
-	cp -rf "$REPO_DIR"/* "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
+	mkdir -p "/mnt/etc" || _errormsg "Failed to create /mnt/etc"
+	cp -rf "$REPO_DIR" "$CONFIG_ROOT" || _errormsg "Failed to copy contents of $REPO_DIR to $CONFIG_ROOT"
+else
+	mkdir -p "$CONFIG_ROOT" || _errormsg "Failed to create $CONFIG_ROOT"
 fi
 
 _set_hostname() {
@@ -687,7 +687,6 @@ _enable_profile() {
 
 _set_optional_profiles() {
 	[ "${OPTIONAL_PROFILES-}" ] && unset OPTIONAL_PROFILES
-	y_or_n "Install programs for hardware diagnostics? (smartmontools, vdpauinfo, mesa-demos, libva-utils, inxi, lshw, etc)" default="no" && _enable_profile "hardware-tools"
 	if [ "${DESKTOP_ENVIRONMENT-}" ]; then
 		y_or_n "Install programs for gaming? (steam, lutris, etc?)" default="no" && _enable_profile "gaming"
 		y_or_n "Install programs for office work? (libreoffice, email client, local CUPS printing server, etc?)" default="no" && _enable_profile "office"
@@ -700,17 +699,24 @@ _set_optional_profiles() {
 _set_desktop_environment() {
 	[ "${DESKTOP_ENVIRONMENT-}" ] && unset DESKTOP_ENVIRONMENT
 
+	XFCE_DESCRIPTION="Modular desktop using gimp toolkit version 3 (gtk3)
+for X11 that allows customization and replaceable components (such as the window manager).
+Great for app compatibility and beginners who wish to branch out."
+
 	KDE_DESCRIPTION="A modern all inclusive desktop environment.
-Very similar to Microsoft Windows 11.
-Perfect for beginners."
+Very similar to Microsoft Windows 11. Good for beginners.
+Pretty heavy on system resources."
+
+	OXWM_DESCRIPTION="Standalone DIY window manager for X11 written by TonyBTW (check him out)
+User friendly version of suckless dwm featuring lua configuration and live-reloading.
+Perfect for enthusists who dislike Wayland adoption."
 
 	LABWC_DESCRIPTION="A very simple and lightweight DIY wayland compositor
 that uses a stacking window layout.
-Ships with the noctalia shell for beginner friendliness."
+Ships with the noctalia V5 shell for beginner friendliness."
 
 	HYPRLAND_DESCRIPTION="A high-quality, modern DIY wayland window manager.
-Uses a traditional dynamic tiling layout
-with an emphasis on visual appearance."
+Uses a traditional dynamic tiling layout with an emphasis on visual appearance."
 
 	NIRI_DESCRIPTION="A high-quality, modern DIY wayland window manager.
 Uses infinite scrolling windows in a tiled format."
@@ -726,10 +732,12 @@ Uses infinite scrolling windows in a tiled format."
 				--reverse \
 				--border-label-pos 1:top \
 				--border-label='Select a desktop environment' \
-				--preview-window 'right,75%,border-left' \
+				--preview-window 'right,85%,border-left' \
 				--preview "
 			case {} in
+				'XFCE') printf '$XFCE_DESCRIPTION' ;;
 				'KDE') printf '$KDE_DESCRIPTION' ;;
+				'Oxwm') printf '$OXWM_DESCRIPTION' ;;
 				'Niri') printf '$NIRI_DESCRIPTION' ;;
 				'LabWC') printf '$LABWC_DESCRIPTION' ;;
 				'Hyprland') printf '$HYPRLAND_DESCRIPTION' ;;
@@ -1382,6 +1390,8 @@ _select_browser() {
 privacy and security."
 	CHROMIUM_DESCRIPTION="Open source alternative to google-chrome."
 	BRAVE_DESCRIPTION="Privacy oriented chromium based browser."
+	QUTEBROWSER_DESCRIPTION="Vim-style keybind driven browser utilizing qtwebengine as a backend.
+Customizable with python scripts. For enthusists."
 	HELIUM_DESCRIPTION="Debloated chromium based browser designed with 
 simplicity and security in mind."
 	MULLVAD_BROWSER_DESCRIPTION="Specialized version of firefox based on the tor-browser designed by mullvad.net
@@ -1397,6 +1407,7 @@ focused on privacy, security, and compatibility with mullvad vpn."
 				--reverse \
 				--border-label-pos 1:top \
 				--border-label="Pick your favorite web browser" \
+				--preview-window='right,80%,border-left' \
 				--preview="
 					case {} in
 					'Firefox') printf '$FIREFOX_DESCRIPTION' ;;
@@ -1405,6 +1416,7 @@ focused on privacy, security, and compatibility with mullvad vpn."
 					'Brave') printf '$BRAVE_DESCRIPTION' ;;
 					'Helium') printf '$HELIUM_DESCRIPTION' ;;
 					'Mullvad-Browser') printf '$MULLVAD_BROWSER_DESCRIPTION' ;;
+					'Qutebrowser') printf '$QUTEBROWSER_DESCRIPTION' ;;
 					*) printf 'No web browser will be installed' ;;
 					esac
 				" | tr '[:upper:]' '[:lower:]'
@@ -1422,7 +1434,7 @@ focused on privacy, security, and compatibility with mullvad vpn."
 		fi
 	done
 
-	unset IFS SELECTED FIREFOX_DESCRIPTION LIBREWOLF_DESCRIPTION CHROMIUM_DESCRIPTION HELIUM_DESCRIPTION TOR_BROWSER_DESCRIPTION
+	unset IFS SELECTED
 }
 
 _set_permission() {

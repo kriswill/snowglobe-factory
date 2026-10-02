@@ -9,13 +9,14 @@ let
   slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
-  options.snowglobe-factory.desktop.labwc.enable = lib.mkEnableOption "snowglobe-factory's labwc module";
+  options.snowglobe-factory.desktop.labwc.enable =
+    lib.mkEnableOption "snowglobe-factory's labwc module";
 
   config = lib.mkIf cfg.enable {
     snowglobe-factory.system.hasDesktop = lib.mkForce true;
     snowglobe-factory.desktop = {
       enable = lib.mkForce true;
-      installWaylandDeps = true;
+      installWaylandTools = true;
     };
     programs = {
       labwc = {

@@ -50,12 +50,11 @@
               outputs.nixosModules.nixos
               # improved disk partition management
               inputs.disko.nixosModules.default
-              # queue system for nix post-build-hook when uploading to binary caches
-              inputs.nix-post-build-hook-queue.nixosModules.default
               # project providing cli indexing
               inputs.nix-index-database.nixosModules.default
-              # provides many rolling release packages
-              inputs.chaotic.nixosModules.default
+
+              # inputs.xlibre-overlay.nixosModules.overlay-xlibre-xserver
+              # inputs.xlibre-overlay.nixosModules.overlay-all-xlibre-drivers
             ])
             # secrets storage and key management
             # does not work with import-tree for some reason
@@ -64,8 +63,6 @@
         };
         # nixos module patches
         nixos = import-tree ./nixosModules/nixos;
-        # jovian configuration
-        jovian = import ./nixosModules/jovian { inherit flake; };
         # expose the modules from nixos-hardware because they do not wrap them with options for some reason
         nixos-hardware = inputs.nixos-hardware.nixosModules;
         default = snowglobe-factory;
@@ -76,11 +73,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:/nixos/nixpkgs/nixos-26.05";
 
-    chaotic = {
-      url = "github:chaotic-cx/nyx";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -88,16 +80,6 @@
 
     distro-grub-themes = {
       url = "github:AdisonCavani/distro-grub-themes";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    flux = {
-      url = "github:iogamaster/flux";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    jovian-nixos = {
-      url = "github:Jovian-Experiments/Jovian-NixOS";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -114,20 +96,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-post-build-hook-queue = {
-      url = "github:newam/nix-post-build-hook-queue";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt.follows = "";
-    };
-
-    selectdefaultapplication-qt6 = {
-      url = "github:tenshou170/selectdefaultapplication-Qt6";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # TODO currently test driving will add later
+    # xlibre-overlay = {
+    #   url = "git+https://codeberg.org/takagemacoed/xlibre-overlay?ref=dev-26.11";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 }

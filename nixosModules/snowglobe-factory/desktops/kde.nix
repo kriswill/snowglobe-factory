@@ -9,24 +9,10 @@ let
   cfg = config.snowglobe-factory.desktop.kde;
 in
 {
-  options.snowglobe-factory.desktop.kde.enable = lib.mkEnableOption "snowglobe-factory's KDE plasma module";
+  options.snowglobe-factory.desktop.kde.enable =
+    lib.mkEnableOption "snowglobe-factory's KDE plasma module";
 
   config = lib.mkIf cfg.enable {
-    # ensure KDE cannot be enabled with DIY desktops, too many things will break due to KDE's invasiveness
-    assertions =
-      lib.mkIf
-        (
-          config.snowglobe-factory.desktop.niri.enable
-          || config.snowglobe-factory.desktop.hyprland.enable
-          || config.snowglobe-factory.desktop.labwc.enable
-        )
-        [
-          {
-            assertion = false;
-            message = "You cannot use other snowglobe-factory.desktop modules in conjuction with KDE.";
-          }
-        ];
-
     snowglobe-factory = {
       system.hasDesktop = lib.mkForce true;
       desktop = {
@@ -77,48 +63,35 @@ in
     qt.platformTheme = lib.mkOverride 899 null;
     qt.style = lib.mkOverride 899 null;
 
-    # disable other polkit-agents in favor of kde polkit agent
-    security.soteria.enable = false;
-    services.polkit-gnome.enable = false;
-
     services = {
       desktopManager.plasma6 = {
         enable = true;
       };
 
-      # use builtin plasma bluetooth
+      # use builtin plasma bluetooth module
       blueman.enable = slib.overrideDefault false;
 
       # use sddm as display manager
       displayManager.ly.enable = false;
       displayManager.sddm.enable = true;
 
+      # disable gnome servcies by default
       gnome = {
-        gnome-software.enable = slib.overrideDefault false;
         gnome-keyring.enable = slib.overrideDefault false;
+        gnome-software.enable = slib.overrideDefault false;
       };
     };
 
     programs = {
       # disable pwvucontrol in favor of the default plasma volume control
       pwvucontrol.enable = slib.overrideDefault false;
-      # disable swaync for plasma's notification daemon
-      swaync.enable = slib.overrideDefault false;
-      # disable batsignal
-      batsignal.enable = slib.overrideDefault false;
       # kde has its own notepad
       mousepad.enable = slib.overrideDefault false;
       # disable gnome-disks in favor of kde-partition-manager
       gnome-disks.enable = slib.overrideDefault false;
       partition-manager.enable = slib.setDefault true;
-      # use dolphin instead of nautilus
-      nautilus.enable = slib.overrideDefault false;
-      # prevent 2 network manager applets
-      networkmanagerapplet.enable = slib.overrideDefault false;
-      # disable nwg-look
-      nwg-look.enable = slib.overrideDefault false;
-      # disable selectdefault application
-      selectdefaultapplication.enable = slib.overrideDefault false;
+      # prevent 2 network manager applets since kde provides its own
+      nm-applet.enable = slib.overrideDefault false;
     };
   };
 }

@@ -1,118 +1,244 @@
-# Yet another fleet manager for NixOS
+# Snowglobe Factory - A NixOS fleet generator and manager
 
-**Similar projects & Inspirations**
-- snowfall-lib - https://github.com/snowfallorg/lib
-- clan-core - https://github.com/clan-lol/clan-core
+This repository contains my shareable NixOS modules, custom package patches, and automation scripts that aim to improve upon NixOS and make the distribution accessible to more people.
+It currently daily drives [my workstations and servers](https://codeberg.org/earthgman/dotfiles) and several hosts operated by friends and family.
 
-**What is this?**
+It is designed for x86_64 AMD/Intel systems built for desktop use or homelab servers.
 
-Short Answer - A NixOS configuration / distribution.
-
-Long Answer - Automatic setup tools, NixOS module tweaks, fleet management automation, and preconfigured nix-community projects like disko and sops-nix.
-The configuration aims to assist with common difficulties of managing your NixOS configurations.
-It aims to be non-invasive, allowing you to freely change the provided flake structure or default settings provided by the modules.
-
-**Why the name?**
-
-Short Answer - Clan was already taken.
-
-Long Answer - In a snowglobe you probably have a little village. In this analogy, the village is your fleet of Nix configurations.
-This project serves a factory for manufacturing these configuration environments. They can have one or more houses inside.
-Plus, it also fits with a part of my name and the ice/snow/winter theme that many Nix/NixOS projects seem to use.
-
-**Why Use this?**
-
-I've been using NixOS for the past several years, and it is a very powerful Linux distribution.
-Unfortunately, there are several gotchas surrounding nix and the nixpkgs ecosystem that give it a rather high barrier to entry to new users.
-The process of learning to properly maintain and modularize your NixOS configuration is a very daunting and time consuming task.
-Example configurations found in the wild are often very confusing and personalized as there is no concrete way to structure them.
-
-So, I wrote this project as an attempt to solve some of these flaws and construct an example NixOS configuration for you that just works out of the box.
-It aims to stay close to a traditional nix flake setup and module layout by avoiding abstraction functions or flake libraries such as flake-parts.
-If you wish to see an example configuration using this, it is the daily driver for my personal fleet, which contains both my workstations and servers.
-https://codeberg.org/earthgman/dotfiles
-
-**Changes to vanilla NixOS**
-- nixpkgs-unstable as the default package source.
-- dash as /bin/sh.
-- lix instead of cppnix.
-- disko over fileSystems for /etc/fstab.
-- sops-nix with age for secret management.
-- nftables instead of iptables.
-- improved default grub theme from https://github.com/AdisonCavani/distro-grub-themes
-- ly as the default display manager (except for KDE Plasma which uses sddm)
-- patches for some buggy behaviors with KDE on NixOS.
-- Noctaila shell enabled for labwc.
-- working default configurations for Niri and Hyprland.
-- public keyring moduleset (config.keyring) managed by the installer script (and you).
-- optional rebuild wrapper for update logging and git synchronization across hosts in your fleet (snowglobe-rebuild).
-- optional specialization profiles that enable out of the box experiences (gaming, office work, pentesting, etc).
-- a handful of rewritten nixos modules that aim to be more intuative (see nixosModules/nixos/disabled.nix).
-- many many extra program options for easier application management across your fleet with per-user package scopes.
+Whether you are an experienced NixOS user, a distro hopper looking for the best Linux distro, or have never even used Linux before, consider checking it out.
 
 
-# DISCLAIMERS
+# What you get
 
-It should go without saying, but this is a passion project that currently has a limited testing scope.
-You probably shouldn't use it if you can get fired.
+**Guided Installation** - I don't expect you to be a NixOS, or Linux expert to install or use your computer.
+The installation script ensures that users receive both a secure and functional system when choosing the default answers to the provided questions.
+
+
+**Flakes by default** - Unlike vanilla NixOS, this project enables and utilizes nix flakes for managing your nix modules and NixOS configurations.
+Several templates are provided that give some guidance for managing your flake inputs, modules, NixOS configurations, packages, overlays, and development shells.
+This template is used with the installer to seamlessly integrate any new host that installs NixOS with your existing nix flake.
+Unlike other NixOS frameworks, this project does not require users to retain the provided setup or directory structure for modules to function.
+However, keep in mind that changing the layout may break the installer's host integration feature.
+
+
+**Declarative disk partitioning** - [Disko](https://github.com/nix-community/disko) is used by the install script for declarative disk partitioning schemes.
+The installer will deploy filesystem configuration from serials in /dev/disk/by-id instead of the filesystem UUID.
+The provided default partition and filesystem layout is not required. Users can supply any valid disko.nix file to the installer.
+
+
+**Root filesystem encryption** - During installation, users can choose to set a password to protect their files if their device or hard drive is stolen.
+
+
+**Automated secrets setup** - Using [sops nix](https://github.com/mic92/sops-nix), secrets such as: user passwords, private keys, and vpn config files can be safely stored online in public repositories.
+This is a rather prominent security hole in vanilla NixOS and is quite a pain to set up. Fortunately for you, the installer does this dirty work so you don't have to.
+
+
+**Frequent package updates** - Even nixos-unstable can take awhile to propagate package updates. This is detremental to packages like Freetube or ani-cli which may require updates to continue working properly.
+For the programs that I commonly use, I provide quick updates for them using an overlay to ensure they stay working.
+
+
+**Configuration integrity tests** - This project uses the nixos-unstable branch of nixpkgs for up-to-date packages.
+Updating nixos-unstable can result in a package that your configuration depends on failing to build, thus you are unable to update and your Saturday is ruined.
+During the weekly flake update, the CI script will attempt to build all programs and NixOS configurations currently registered with the build system.
+The configurations tested include all supported FOSS program options, desktop environments, and the wide variety of NixOS configurations from friends and family.
+I can then provide fixes for the failing package builds from nixpkgs using an overlay before releasing an update.
+This ensures that users receive up-to-date packages and never have to deal with update failures.
+
+
+**Persistent ssh host keys** - With sops-nix and the `envionment.etc` option, the installer ensures that the openssh keypair for this host stays persistent across reinstallations.
+These keys are also linked to /root/.ssh, which allows the root user to use the same key-pairs as the host. This can be useful for automation like uploading build artifacts to a cache server.
+
+
+**Optional Cache** - Custom packages and overlays from this repo are built and cached at https://nix-store.earthgman.dev.
+
+
+**extra binary caches configuration module** - Allows users to easily enable/disable and customize extra nix binary caches in one place.
+Usage Example:
+```nix
+substituters = {
+  "nix-store.earthgman.dev" = {
+    enable = true;
+    protocol = "https"
+    publicKey = "nix-store.earthgman.dev:2Qrw9kS+K2c00ikcgaz5Y0M7j5XmkhFJz3d7oNgJdLw=";
+    priority = 40;
+  };
+};
+```
+
+
+**Keyring module** - Toplevel `keyring` config module allows users to name and store their OpenPGP, SSH, and Age public keys.
+The installer script will automatically register keys provided or generated by it during the installation process.
+
+
+**Reinvented program modules** - Unfortunately, vanilla NixOS has a fragmented approach for installing software. Some can be simply added to `environment.systemPackages`
+while others must be enabled with a provided `programs.name.enable` or it may not be fully functional.
+This projet aims to remedy this problem by introducing additional popular programs within the FOSS ecosystem to the `programs` config toplevel.
+These modules are standardized, provide per-user package scoping, and allow greater flexibility with controlling software installed across your NixOS hosts.
+
+Example: Alice and Bob share a server and have different configurations for their favorite editor, Neovim, that they have each packaged using nix.
+```nix
+programs.neovim = {
+  # enable this program's configuration
+  enable = true;
+
+  # install the value of `package` to environment.systemPackages
+  installGlobally = true;
+
+  # package provided to environment.systemPackages and any users.users.$names.packages listed in installForUsers.
+  package = pkgs.neovim;
+
+  installForUsers = [ "bob" "alice" ];
+
+  # each user value uses `package` by default but can be manually overitten like so
+  userPackages = {
+    bob = pkgs.bobs-configs.neovim;
+    alice = pkgs.alices-configs.neovim;
+  };
+};
+```
+
+
+**Configuration update helper** - Using `programs.snowglobe-rebuild.enable` (enabled by default) will provide a wrapper for `nixos-rebuild` invoked with `snowglobe-rebuild` that assists with managing your NixOS generations.
+It integrates with the following tools:
+- [nix-output-monitor](https://github.com/maralorn/nix-output-monitor) - gives you a pretty view of the build process.
+- [systemd run0](https://wiki.archlinux.org/title/Systemd/run0) - a secure suid-less privilege elevation program that integrates with your desktop's configured polkit agent.
+- [nvd](https://khumba.net/projects/nvd/) - writes all closure changes for each NixOS generation including package additions, removals, version changes, and disk usage to a log file in your repository.
+- git - automatically attempts to pull your remote repository, creates commits for flake.lock updates, and reminds you to commit changes before adding a new generation to your bootloader.
+
+
+**Automated hardware detection** - The installer attempts to detect hardware characteristics of your system such as the gpu vendor you are using.
+It will then attempt to install the appropriate cpu microcode and gpu drivers for that system.
+The configuration is redetected every time you re-run the installer, so if you change gpu vendors or add another gpu vendor to your board, the drivers for that vendor are installed automatically.
+Warning: Nvidia GPUs have not been thoroughly tested.
+
+
+**Optional Profiles** - Several optional profiles are provided during the installation process based on the user's needs.
+- Office - Install libreoffice, thunderbird email client, and a preconfigured CUPS printing server with common FOSS printing drivers already available.
+- Hacker Mode - Installs many tools from Kali Linux like wireshark, tor-browser, nmap and zenmap, ghidra, metasploit and more.
+- Gaming - Installs and configures Steam, lutris, and proton/wine management utilities.
+- Nix Tools - Install and configure tools for working with projects using nix (like direnv).
+- Harden - Provides a hardened configuration for public facing servers. Disables mutable users and prevents SSH password login by default.
+
+
+**Zsh instead of bash** - zsh with syntax highlighting and autosuggestion plugins enabled by default.
+Can be reverted with:
+`users.defaultUserShell = pkgs.bash`
+
+
+**Configurations for popular desktops** - Installs programs used by the default configurations of popular desktops and window managers.
+
+
+**ly display-manager** - A TTY based display-manager that is even more lightweight than lightdm.
+
+
+**Flatpak for desktops** - If a desktop is chosen during installation, the flatpak service will be installed and configured by default so users can imperatively install apps independently of nix.
+This can be disabled with `services.flatpak.enable = false`
+
+
+**Debloater for headless systems** - Remove some fluff that NixOS enables by default if no desktop environment is installed.
+
+
+**Improved Grub theme** - Installs the NixOS grub theme from https://github.com/AdisonCavani/distro-grub-themes
+
+
+**Automated timezone detection** - If `time.timeZone = null` then your timezone will be detected automatically by your geolocation every time you connect to the internet.
+
+
+**Optional qemu/kvm configuration** - Setting `snowglobe-factory.qemu.enable = true` provides a working configuration for using all features of virt-manager with creating and managing virtual machines.
+
+
+**Optional CUPS printing configuration** - Setting `snowglobe-factory.cups.enable = true` provides a printing server with FOSS drivers installed. It is enabled automatically by the office profile.
+
+
+**Dash as /bin/sh** - Use the smallest and fastest posix-compliant shell for scripts that call #!/bin/sh directly.
+
+
+**Firewall** - The system has a firewall enabled by default that disables replies to ICMP packets.
+
+
+**Nix-index-database and comma** - Installs the following CLI tools:
+- nix-locate - locates libraries or program binaries in nixpkgs from your terminal instead of a web-browser.
+- nix-index-database - Updates the database.
+- , - literally just a comma. Searches the database for a program binary within nixpkgs from the provided name and runs it.
+
+
+**nix functions**
+- mkProgramOption - creates a program option, allowing you to use the wrapper for programs that may not be included in the base repo.
+- installProgram - used to implement the defined program options from mkProgramOption.
+- mkGraphicalService - creates systemd service configurations bound to graphical-session.target. Used by programs that users may wish to run as a desktop service.
+- mkNixosHost - wrapper for lib.nixosSystem that provides a pretty overview of your hosts's hardware characteristics. It is responsible for enabling this projects modules and overlays for a given host.
 
 
 # Getting Started
 
-You can consume the modules directly from an existing nix flake
+If you have never used NixOS before, the easiest installation method would be to use one of the precompiled iso images
+https://www.earthgman.dev/assets/snowglobe-installers/
+
+- Images suffixed with -small do not contain firmware blobs from linux-firmware so they are smaller, but cannot be used with all systems.
+- Images suffixed with -untrusted will ensure that the binary cache, nix-store.earthgman.dev, is disabled at all times.
+
+Download the iso corresponding to your use case.
+You can then use `dd` from a shell or a graphical application like rufus or balena-etcher to burn the image to a USB stick.
+
+Ensure that secure boot is disabled in your system's BIOS configuration utility or the iso cannot boot.
+Once booted the rest should be self-explanitory.
+
+
+# Existing Flakes
+If you already have a nix flake, you can consume the modules directly.
 
 ```nix
-{
-  inputs = {
-    snowglobe-factory.url = "https://codeberg.org/earthgman/snowglobe-factory";
-    nixpkgs.follows = "snowglobe-factory/nixpkgs" # recommended but not required
+# flake.nix
+
+inputs = {
+  snowglobe-factory = {
+    url = "git+https://codeberg.org/earthgman/snowglobe-factory";
+    # Add only if you choose to use your own nixpkgs revision.
+    # inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { snowglobe-factory, nixpkgs }: 
-  {
-    nixosConfigurations.myhostname = snowglobe-factory.lib.mkNixosHost {
-      hostname = "myhostname";
+  # OPTIONAL: pin your nixpkgs revision to the framework for improved reliability
+  nixpkgs.follows = "snowglobe-factory/nixpkgs";
+};
+
+outputs = { nixpkgs, snowglobe-factory, ... }: {
+  let
+    lib = nixpkgs.lib;
+    slib = snowglobe-factory.lib;
+  in
+  nixosConfigurations = { 
+
+    # option 1 - using the modules only
+    your-host = lib.nixosSystem {
       system = "x86_64-linux";
-      firmware = "UEFI";
-      cpu-vendor = "intel";
-      gpu-vendors = [ "amd" ];
-      isVM = false;
-      stateVersion = "26.11";
-      specialArgs = { inherit inputs; };
-      configDir = ./nixosConfigurations/myhostname;
-      modules = [  ];
+      modules = [
+        ./configuration.nix
+        snowglobe-factory.nixosModules.default
+        {
+          # enable the default configurations
+          snowglobe-factory.enable = true;
+          # add overlay
+          nixpkgs.overlays = [ snowglobe-factory.overlays.default ];
+        }
+      ];
+    };
+
+    # option 2 - using the provided lib.nixosSystem wrapper
+    # automatically enables the modules and applies overlays
+    your-other-host = slib.mkNixosHost {
+      hostname = "your-other-host";
+      firmware = "UEFI";                                 # or BIOS for older systems (< 2009)
+      system = "x86_64-linux";
+      cpu-vendor = "amd";                                # or "intel"  
+      gpu-vendors = [ "amd" "nvidia" "intel" ];          # install drivers for cards from these vendors
+      isVM = false;                                      # is this host running as as qemu guest?
+      stateVersion = "26.11";                            # the version of NixOS this host was installed with
+      configDir = ./nixosConfigurations/your-other-host; # directory where the configuration.nix is located.
+      specialArgs = {  };                                # pass any extra args to modules
+
+      # Note: configDir imports and handles any .nix file present in the specified directory.
+      modules = [  ];                                    # pass modules from flake inputs or flake outputs
     };
   };
 }
 ```
-
-This function will take care of the setup and apply the appropriate default configuration for the hardware parameters you pass to it.
-You can view every arguments possible value and its description at: lib/functions/flake-helpers/mkNixosHost.nix
-
-**Using the installation images**
-
-Pre-built images can be found at https://www.earthgman.dev/assets/snowglobe-installers/
-These contain the scripts responsible for the automatic hardware detection, flake creation, and installation of the distribution.
-
-You can also build these yourself if you have nix installed by using: ```nixos-rebuild build-image```
-
-Images labeled 'small' do not contain extra firmware from linux-firmware. They are useful for VMs or hosts that dont need any blobs from it.
-Images labeled 'untrusted' ensure that the provided cache "nix-store.earthgman.dev" is disabled at all times.
-
-Once booted the rest should be self-explanitory.
-
-
-# Post install
-
-You may wish to change the ownership of /etc/nixos to your underprivledged user so you can edit the config files.
-If you do, you should continue to use the root user to edit your secrets. If for some reason you wish to expose the private key to every process running as your user, you can copy the key to ~/.config/sops/age.
-HEADS UP: This file is an unencrypted private key owned by root. Anybody who gains unauthorized access to it (via priviledge escalation or by stealing your drive) will be able to decrypt any secrets used by sops-nix.
-You may wish to utilize something like the TPM to store it more securely, but it is up to you.
-
-initial git setup and choice of provider is not enforced. The project does not automatically configure git for your newly created /etc/nixos.
-Once a git repo is detected, snowglobe-rebuild will attempt to sync commits and track updates through an updates.log file if you choose to use it.
-
-I will not provide the constantly changing module tree here. You can browse available modules and their descriptions using ```nixos-rebuild repl```
-or a third party program like ```nix-inspect``` https://github.com/bluskript/nix-inspect
-
-Eventually, I plan to make a TUI which lets you control and set common options more easily.

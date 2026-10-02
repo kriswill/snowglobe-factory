@@ -13,10 +13,6 @@ in
   config = lib.mkIf moduleEnabled {
     hardware.graphics.enable = true;
     # good tool for monitoring and control of your gpu
-    services.lact.enable =
-      let
-        cfgp = config.snowglobe-factory.profiles;
-      in
-      slib.setDefault (cfgp.hardware-tools.enable || cfgp.gaming.enable);
+    services.lact.enable = slib.setDefault true;
   };
 }

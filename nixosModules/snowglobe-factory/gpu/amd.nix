@@ -9,11 +9,11 @@ let
   cfg = config.snowglobe-factory.gpu.amd;
 in
 {
-  options.snowglobe-factory.gpu.amd.enable = lib.mkEnableOption "snowglobe-factory's amdgpu configuration";
+  options.snowglobe-factory.gpu.amd.enable =
+    lib.mkEnableOption "snowglobe-factory's amdgpu configuration";
+
   config = lib.mkIf cfg.enable {
-    services = {
-      xserver.videoDrivers = [ "amdgpu" ];
-    };
+    services.xserver.videoDrivers = [ "amdgpu" ];
 
     hardware = {
       # allow overclocking

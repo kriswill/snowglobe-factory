@@ -19,11 +19,15 @@ in
     # shared desktop configuration
     snowglobe-factory.desktop = {
       enable = true;
-      installWaylandDeps = true;
+      installWaylandTools = true;
     };
+
+    services.polkit-gnome.enable = slib.setDefault true;
+
     programs = {
       niri = {
         enable = true;
+        useNautilus = slib.setDefault true;
       };
 
       # default terminal
@@ -37,13 +41,6 @@ in
         enable = slib.setDefault true;
         # prevent 2 waybars from showing up due to niri's default config
         systemd.enable = slib.setDefault false;
-      };
-
-      # gtk volume control application for pipewire
-      pwvucontrol = lib.mkIf (config.services.pipewire.enable) {
-        enable = slib.setDefault true;
-        # waybar hardcodes 'pavucontrol' in its default config
-        pavucontrolAlias = slib.setDefault true;
       };
 
       # default xwayland implementation for niri

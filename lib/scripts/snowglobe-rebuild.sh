@@ -1,5 +1,10 @@
+#!/bin/sh
+
 # wrapper around nixos-rebuild, ensuring configurations are automaically logged and commited to git
 set -u
+set -o pipefail
+
+SCRIPT_NAME="snowglobe-rebuild"
 
 y_or_n() {
 	while true; do
@@ -38,14 +43,19 @@ _notify() {
 	STATUS="$1"
 	MSG="$2"
 
-	_desktop_active && ENABLE_NOTIFICATIONS=1
-	if [ "${ENABLE_NOTIFICATIONS-}" ] && ! _is_on_path "notify-send"; then
-		_warnmsg "notify-send not on PATH. Desktop notifications will not be sent."
-		unset ENABLE_NOTIFICATIONS
-	fi
+	if [ ! "${DONT_NOTIFY-}" ]; then
+		_desktop_active || DONT_NOTIFY=1
+		if [ ! "${DONT_NOTIFY-}" ] && ! _is_on_path "notify-send"; then
+			_warnmsg "notify-send not on PATH. Desktop notifications will not be sent."
+			DONT_NOTIFY=1
+		fi
 
-	if [ "${ENABLE_NOTIFICATIONS-}" ]; then
-		notify-send -a "snowglobe-rebuild" "$STATUS" "$MSG" || _warnmsg "Failed to send desktop notification with content: $MSG"
+		if [ ! "${DONT_NOTIFY-}" ]; then
+			if ! notify-send -a "$SCRIPT_NAME" "$STATUS" "$MSG"; then
+				_warnmsg "Failed to send desktop notification with content: $MSG. Disabling notifications."
+				DONT_NOTIFY=1
+			fi
+		fi
 	fi
 
 	case $STATUS in
@@ -60,34 +70,33 @@ _notify() {
 [ "${1-}" ] || _errormsg "Unknown usage."
 
 case "$1" in
-# TODO implement configuration via nixos module
 "help" | "--help")
-	printf "Wrapper around nh os and nixos-rebuild.\n"
-	printf "usage: snowglobe-rebuild [options]\n\n"
+	printf "Wrapper around nixos-rebuild that automatically tracks your configuration changes through git.\n"
+	printf "Usage: $SCRIPT_NAME [options]\n"
 
-	printf "Options are directly passed to one of the two programs.\n"
-	printf "For commands that use can 'nh os' (boot, switch, test, repl, etc) use man nh to see options.\n"
-	printf "For others use man nixos-rebuild or 'nixos-rebuild --help'\n"
+	printf "\nOptions are directly passed to nixos-rebuild.\n"
+	printf "to see them use: man nixos-rebuild or 'nixos-rebuild --help'\n"
+
+	printf "\nEnvironment:\n"
+	printf "  FLAKE_DIR: Configured by --flake. Defaults to /etc/nixos.\n"
+	printf "  ELEVATION_PROGRAM: Configured by --elevate. Defaults to run0.\n"
+	printf "  DONT_NOTIFY: Set to any value (example DONT_NOTIFY=1) to prevent notification spam for desktop environments if notify-send is installed.\n"
+	printf "  IGNORE_GIT_SYNCHRONIZATION set to any value to disable git synchronization checks.\n"
 	exit 0
 	;;
-"test")
-	NEEDS_PRIVILEGES=1
-	CAN_USE_NH_OS=1
-	;;
+"test") NEEDS_PRIVILEGES=1 ;;
 "switch" | "boot")
 	PERSISTENT=1
 	NEEDS_PRIVILEGES=1
-	CAN_USE_NH_OS=1
 	;;
-"info" | "rollback") CAN_USE_NH_OS=1 ;;
 esac
 
 _restore_git_stash() {
 	if [ "${GIT_STASHED-}" ]; then
-		git stash apply >/dev/null || _errormsg "Could not apply git stash. You may have to manually run git stash apply to recover your changes."
+		git stash apply >/dev/null || _notify "Error" "Could not apply git stash. You may have to manually run git stash apply to recover your changes."
 		unset GIT_STASHED
 		# add applied stash to back to the work tree
-		git add .
+		git add . || _notify "Error" "Could not add stashed changes to the working git tree."
 	fi
 }
 
@@ -105,63 +114,48 @@ for arg in "$@"; do
 	case "$arg" in
 	"--flake") FLAKE_DIR="$(readlink -f "$(printf "%s" "$NEXT_ARG" | cut -d'#' -f1)")" ;;
 	# TODO if no target host is specified, use a menu with known hosts
-	# Also nh os and nixos-rebuild have different elevation strategy command syntax
 	"--target-host")
 		TARGET_HOST=$(printf "%s" "$NEXT_ARG" | cut -d'@' -f2)
-		[ "${TARGET_HOST-}" ] || _errormsg "No target host was specified"
+		[ "${TARGET_HOST-}" ] || _notify "Error" "No target host was specified"
 		;;
-		# nh and nixos-rebuild have different names for this for some reason
-	"--elevate" | "--elevation-strategy")
+	"--elevate")
 		ELEVATION_PROGRAM="$NEXT_ARG"
 		_is_on_path "$ELEVATION_PROGRAM" || _notify "Error" "Elevation program: $ELEVATION_PROGRAM is not on path."
 		;;
+	"--ask-sudo-password") ELEVATION_PROGRAM="sudo" ;;
 	esac
 	ARG_IDX=$((ARG_IDX + 1))
 done
 
 [ "${FLAKE_DIR-}" ] || FLAKE_DIR="/etc/nixos"
-[ -e "$FLAKE_DIR/flake.nix" ] || _errormsg "no flake found in $FLAKE_DIR"
+[ -e "$FLAKE_DIR/flake.nix" ] || _notify "Error" "no flake found in $FLAKE_DIR"
 
-UPDATE_LOG="$FLAKE_DIR/updates.log"
+cd "$FLAKE_DIR" || _notify "Error" "Could not change working directory to $FLAKE_DIR"
+
+UPDATE_LOG_FILE="$FLAKE_DIR/updates.log"
 FLAKE_DIR_OWNER="$(stat -c '%U' -L "$FLAKE_DIR")"
 WHOAMI="$(whoami)"
 
-if [ "$WHOAMI" = "root" ]; then
-	unset CAN_USE_NH_OS
-	unset NEEDS_PRIVILEGES
-fi
+[ "$WHOAMI" = "root" ] && unset NEEDS_PRIVILEGES
 
-if [ ! "${ELEVATION_PROGRAM-}" ]; then
-	# pkexec only appears in /run/wrappers/bin if the option config.security.polkit.enablePkexecWrapper is true
-	# while the program exists in /run/current-system/sw/bin by default, it does not function properly.
-	# It is possible to change this location but most users probably will not.
-	if [ -e /run/wrappers/bin/pkexec ]; then
-		ELEVATION_PROGRAM="pkexec"
-	else
-		# use systemd's run0 as opposed to sudo due to its integration with polkit
-		ELEVATION_PROGRAM="run0"
-	fi
-fi
-
-if ! _is_on_path "nh" && [ "${CAN_USE_NH_OS-}" ]; then
-	unset CAN_USE_NH_OS
-else
-	NH_ELEVATION_STRATEGY="$ELEVATION_PROGRAM" export NH_ELEVATION_STRATEGY
-fi
-
-cd "$FLAKE_DIR" || _errormsg "Could not change working directory to $FLAKE_DIR"
+# default to run0 due to its integration with polkit
+# Note run0 can break in tmux sessions that have DISPLAY or WAYLAND_DISPLAY set while a desktop is not actually active.
+[ "${ELEVATION_PROGRAM-}" ] || ELEVATION_PROGRAM="run0"
 
 [ -d "$FLAKE_DIR/.git" ] && GIT_REPO_PRESENT=1
 
+# every time the flake lock updates, commit with git
 _commit_flake_lock() {
 	if git status | grep -q flake.lock; then
-		git add flake.lock || _errormsg "Failed to add changes to flake.lock to git."
-		git commit -m "update flake.lock" || _errormsg "Failed to commit update to flake.lock"
+		git add flake.lock || _notify "Error" "Failed to add changes to flake.lock to git."
+		git commit -m "update flake.lock" || _notify "Error" "Failed to commit update to flake.lock"
 	fi
 }
 
-if [ "${GIT_REPO_PRESENT-}" ]; then
-	[ "$WHOAMI" = "$FLAKE_DIR_OWNER" ] || _errormsg "$FLAKE_DIR is not owned by the current user. Git operations cannot continue safely."
+if [ "${GIT_REPO_PRESENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
+	# bail if flake directory is not owned by the current user.
+	# TODO I dont really like this behavior in very specific situations but it should be fine for now.
+	[ "$WHOAMI" = "$FLAKE_DIR_OWNER" ] || _notify "Error" "$FLAKE_DIR is not owned by the current user invoking $SCRIPT_NAME. Git operations cannot continue safely."
 	[ "$(git remote)" ] && REMOTE_PRESENT=1
 	[ "${PERSISTENT-}" ] && _commit_flake_lock
 
@@ -170,27 +164,27 @@ if [ "${GIT_REPO_PRESENT-}" ]; then
 		git ls-remote -q && REMOTE_REACHABLE=1
 		git status | grep -q "nothing to commit, working tree clean" || DIRTY_WORKTREE=1
 		if [ "${REMOTE_REACHABLE-}" ]; then
-			git fetch || _errormsg "Failed to fetch from remote."
-			# pull with rebase if your local is behind your remote
+			git fetch || _notify "Error" "Failed to fetch repository from configured remote."
 			if git status -sb | grep -q "behind"; then
 				# stash any local uncommitted changes to allow pulling via rebase
 				if [ "${DIRTY_WORKTREE-}" ]; then
 					if git stash >/dev/null; then
 						GIT_STASHED=1
 					else
-						_errormsg "Failed to stash uncommitted changes in your repo."
+						_notify "Error" "Failed to stash uncommitted changes in your repo."
 					fi
 				fi
 
 				if git pull --rebase; then
 					_restore_git_stash
 				else
-					_errormsg "Could not pull with rebase"
+					_restore_git_stash
+					_notify "Error" "Could not pull with rebase"
 				fi
 			fi
 		else
 			_restore_git_stash
-			[ "${PERSISTENT-}" ] && _errormsg "Git synchronization operations should not fail for persistent changes. Try with 'test' until issues are resolved."
+			[ "${PERSISTENT-}" ] && _notify "Error" "Git synchronization operations should not fail for persistent changes. Try switching configuration using '$SCRIPT_NAME test' until git issues are resolved."
 			y_or_n "Continue without git synchronization features?" || _errormsg "Aborted"
 			IGNORE_GIT_SYNCHRONIZATION=1
 		fi
@@ -227,24 +221,46 @@ if [ "${GIT_REPO_PRESENT-}" ]; then
 	fi
 fi
 
-ERRORMSG="Rebuild failed or timeout reached."
-if [ "${NEEDS_PRIVILEGES-}" ] && [ ! "${CAN_USE_NH_OS-}" ]; then
-	$ELEVATION_PROGRAM nixos-rebuild "$@" || _notify "Error" "$ERRORMSG"
-elif [ "${CAN_USE_NH_OS-}" ]; then
-	NH_OS_FLAKE="$(readlink -f "$FLAKE_DIR")" export NH_OS_FLAKE
-	nh os "$@" || _notify "Error" "$ERRORMSG"
+[ "${TARGET_HOST-}" ] || TARGET_HOST="$(cat /etc/hostname)"
+[ "${TARGET_HOST-}" ] || _notify "Error" "Failed to retrieve hostname from /etc/hostname."
+
+XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}"
+SCRIPT_RUNTIME_DIR="$XDG_RUNTIME_DIR/$SCRIPT_NAME"
+mkdir -p "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to create temporary configuration directory."
+
+case "$1" in
+"switch" | "test" | "boot")
+	cd "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to change the working directory to $SCRIPT_RUNTIME_DIR."
+	# build the system and use nix-output-monitor to make the build output prettier
+	# note: pipefail must be set for this to work properly
+	2>&1 nixos-rebuild build --flake "$FLAKE_DIR#$TARGET_HOST" | nom || _notify "Error" "System failed to build."
+	# use nvd to get the difference between the current system and the system that was just built.
+	# The user can review the configuration differences before authenticating the activation
+	CURRENT_GENERATION_NUMBER="$(nixos-rebuild list-generations | grep -v "Generation" | head --lines 1 | cut -d' ' -f1)"
+	[ "${CURRENT_GENERATION_NUMBER-}" ] || _notify "Error" "Failed to obtain the current generation number."
+
+	# TODO figure out how to get color output.
+	NVD_DIFF="$(nvd diff /nix/var/nix/profiles/system-"$CURRENT_GENERATION_NUMBER"-link result)"
+	printf "%s\n\n" "$NVD_DIFF"
+	[ "${NVD_DIFF-}" ] || _notify "Error" "Failed to retrieve the nvd diff for this generation."
+
+	cd "$FLAKE_DIR" || _notify "Error" "Failed to return working directory to $FLAKE_DIR"
+
+	_notify "Success" "Nixos system build is complete. Review the changes and authenticate to continue."
+	y_or_n "Continue?" || _errormsg "Aborted"
+	;;
+esac
+
+if [ "${NEEDS_PRIVILEGES-}" ]; then
+	$ELEVATION_PROGRAM nixos-rebuild "$@" || _notify "Error" "nixos-rebuild exited with errors"
 else
-	nixos-rebuild "$@" || _notify "Error" "$ERRORMSG"
+	nixos-rebuild "$@" || _notify "Error" "nixos-rebuild exited with errors"
 fi
 
 if [ "${PERSISTENT-}" ]; then
-	# check if the flake was updated by args passed to nh or nixos-rebuild and commit it
 	[ "${GIT_REPO_PRESENT-}" ] && _commit_flake_lock
-	[ "${TARGET_HOST-}" ] || TARGET_HOST="$(cat /etc/hostname)"
-	# keep a log file of your system updates
-	# this log uses a tool 'nvd' to display all package changes
-	if [ ! -e "$UPDATE_LOG" ]; then
-		touch "$UPDATE_LOG" >/dev/null 2>&1 || $ELEVATION_PROGRAM touch "$UPDATE_LOG"
+	if [ ! -e "$UPDATE_LOG_FILE" ]; then
+		touch "$UPDATE_LOG_FILE" >/dev/null 2>&1 || $ELEVATION_PROGRAM touch "$UPDATE_LOG_FILE"
 	fi
 
 	NIXOS_GENERATION_INFO=$(nixos-rebuild list-generations | grep True | tr -s ' ' | cut -d' ' -f1-5)
@@ -253,39 +269,37 @@ if [ "${PERSISTENT-}" ]; then
 	KERNEL_VERSION=$(printf "%s" "$NIXOS_GENERATION_INFO" | cut -d' ' -f5)
 
 	PREVIOUS_GENERATION="$(nixos-rebuild list-generations | grep -v -e 'True' -e 'Generation' | cut -d' ' -f1 | head --lines 1)"
-	[ "$PREVIOUS_GENERATION" ] || _errormsg "Could not obtain the previous generation number."
 	LOG=1
-	[ "$GENERATION" = "$PREVIOUS_GENERATION" ] && unset LOG
+	[ "${GENERATION-}" = "${PREVIOUS_GENERATION-}" ] && unset LOG
 
 	if [ "${LOG-}" ]; then
+		TMP_LOGFILE="$SCRIPT_RUNTIME_DIR/system-update.log"
 		UPDATE_MSG="$(
-			printf "Host: %s\n%s\nKernel - %s%s\n" \
-				"$TARGET_HOST" "$TIMESTAMP" "$KERNEL_VERSION" "$(nvd history -m "$PREVIOUS_GENERATION" | grep -v 'Contents of profile version')"
+			printf "%s\nHost: %s\nKernel - %s\n%s\n" \
+				"$TIMESTAMP" "$TARGET_HOST" "$KERNEL_VERSION" "$(cat "$NVD_DIFF_FILE")"
 		)"
-		printf "%s\n\n" "$UPDATE_MSG" | cat - "$UPDATE_LOG" >/tmp/snowglobe-system-update.log
+		printf "%s\n\n" "$UPDATE_MSG" | cat - "$UPDATE_LOG_FILE" >"$TMP_LOGFILE" || _notify "Error" "Could not write to temporary log file $TMP_LOGFILE"
 		if [ "$WHOAMI" = "$FLAKE_DIR_OWNER" ]; then
-			mv /tmp/snowglobe-system-update.log "$UPDATE_LOG" || _errormsg "Could not move updates.log into place"
+			mv "$TMP_LOGFILE" "$UPDATE_LOG_FILE" || _notify "Error" "Could not move $TMP_LOGFILE to $UPDATE_LOG_FILE"
 		else
-			$ELEVATION_PROGRAM mv /tmp/snowglobe-system-update.log "$UPDATE_LOG" || _errormsg "Could not move updates.log into place"
+			$ELEVATION_PROGRAM mv "$TMP_LOGFILE" "$UPDATE_LOG_FILE" || _notify "Error" "Could not move updates.log into place"
 		fi
 
 		if [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ] && [ "${GIT_REPO_PRESENT-}" ]; then
 			if ! git add .; then
 				_restore_git_stash
-				_errormsg "could not stage changes to the updates.log"
+				_notify "Error" "could not stage changes to the updates.log"
 			fi
 
-			COMMIT_MSG="Updated: $TARGET_HOST"
-
-			if ! git commit -m "$COMMIT_MSG"; then
+			if ! git commit -m "Updated: $TARGET_HOST"; then
 				_restore_git_stash
-				_errormsg "Could not commit update to git"
+				_notify "Error" "Could not commit update to git"
 			fi
 
 			if [ "${REMOTE_REACHABLE-}" ]; then
 				if ! git push; then
 					_restore_git_stash
-					_errormsg "Could not push update to remote repository"
+					_notify "Error" "Could not push update to remote repository"
 				fi
 			fi
 

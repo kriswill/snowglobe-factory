@@ -6,30 +6,20 @@
 }:
 let
   slib = import ../../../../lib/functions/module-wrappers { inherit lib; };
-  programName = "foot";
+  programName = "xwallpaper";
   cfg = config.programs.${programName};
 in
 {
   options.programs.${programName} = slib.mkProgramOption {
     inherit pkgs;
-    description = "A simple terminal emulator for X and Wayland";
+    description = "a wallpaper manager for X11";
     programName = programName;
     packageName = programName;
-    extraOptions = {
-      systemd.enable = lib.mkOption {
-        description = "Whether to enable the systemd unit for foot --server";
-        type = lib.types.bool;
-        default = true;
-      };
-    };
   };
 
   config = lib.mkIf cfg.enable (
     slib.installProgram {
       inherit programName config;
-      extraModules = {
-        systemd.packages = lib.mkIf cfg.systemd.enable [ cfg.package ];
-      };
     }
   );
 }

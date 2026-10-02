@@ -23,13 +23,6 @@ in
   programs = enableAllModules "programs";
   services = enableAllModules "services";
 
-  # build decky and other jovian plugins
-  imports = [ outputs.nixosModules.jovian ];
-  jovian.steam = {
-    user = "bob";
-    desktopSession = "niri";
-  };
-
   snowglobe-factory = {
     gpu = {
       amd.enable = mkForce true;
@@ -46,7 +39,6 @@ in
     profiles = {
       office.enable = true;
       hacker-mode.enable = true;
-      hardware-tools.enable = true;
       nix-tools.enable = true;
       gaming.enable = true;
     };
