@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # wrapper around nixos-rebuild, ensuring configurations are automaically logged and commited to git
 set -u
 set -o pipefail
@@ -225,30 +227,34 @@ fi
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}"
 SCRIPT_RUNTIME_DIR="$XDG_RUNTIME_DIR/$SCRIPT_NAME"
 mkdir -p "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to create temporary configuration directory."
-cd "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to change the working directory to $SCRIPT_RUNTIME_DIR."
-# build the system and use nix-output-monitor to make the build output prettier
-# note: pipefail must be set for this to work properly
-2>&1 nixos-rebuild build --flake "$FLAKE_DIR#$TARGET_HOST" | nom || _notify "Error" "System failed to build."
-# use nvd to get the difference between the current system and the system that was just built.
-# The user can review the configuration differences before authenticating the activation
-CURRENT_GENERATION_NUMBER="$(nixos-rebuild list-generations | grep -v "Generation" | head --lines 1 | cut -d' ' -f1)"
-[ "${CURRENT_GENERATION_NUMBER-}" ] || _notify "Error" "Failed to obtain the current generation number."
 
-# TODO figure out how to get color output.
-NVD_DIFF="$(nvd diff /nix/var/nix/profiles/system-"$CURRENT_GENERATION_NUMBER"-link result)"
-printf "%s\n\n" "$NVD_DIFF"
-[ "${NVD_DIFF-}" ] || _notify "Error" "Failed to retrieve the nvd diff for this generation."
+case "$1" in
+"switch" | "test" | "boot")
+	cd "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to change the working directory to $SCRIPT_RUNTIME_DIR."
+	# build the system and use nix-output-monitor to make the build output prettier
+	# note: pipefail must be set for this to work properly
+	2>&1 nixos-rebuild build --flake "$FLAKE_DIR#$TARGET_HOST" | nom || _notify "Error" "System failed to build."
+	# use nvd to get the difference between the current system and the system that was just built.
+	# The user can review the configuration differences before authenticating the activation
+	CURRENT_GENERATION_NUMBER="$(nixos-rebuild list-generations | grep -v "Generation" | head --lines 1 | cut -d' ' -f1)"
+	[ "${CURRENT_GENERATION_NUMBER-}" ] || _notify "Error" "Failed to obtain the current generation number."
 
-cd "$FLAKE_DIR" || _notify "Error" "Failed to return working directory to $FLAKE_DIR"
+	# TODO figure out how to get color output.
+	NVD_DIFF="$(nvd diff /nix/var/nix/profiles/system-"$CURRENT_GENERATION_NUMBER"-link result)"
+	printf "%s\n\n" "$NVD_DIFF"
+	[ "${NVD_DIFF-}" ] || _notify "Error" "Failed to retrieve the nvd diff for this generation."
 
-_notify "Success" "Nixos system build is complete. Review the changes and authenticate to continue."
-y_or_n "Continue?" || _errormsg "Aborted"
+	cd "$FLAKE_DIR" || _notify "Error" "Failed to return working directory to $FLAKE_DIR"
 
-# now we can apply the configuration using the flags that the program was invoked with
+	_notify "Success" "Nixos system build is complete. Review the changes and authenticate to continue."
+	y_or_n "Continue?" || _errormsg "Aborted"
+	;;
+esac
+
 if [ "${NEEDS_PRIVILEGES-}" ]; then
-	$ELEVATION_PROGRAM nixos-rebuild "$@" || _notify "Error" "Failed to apply the configuration using nixos-rebuild"
+	$ELEVATION_PROGRAM nixos-rebuild "$@" || _notify "Error" "nixos-rebuild exited with errors"
 else
-	nixos-rebuild "$@" || _notify "Error" "Failed to apply the configuration using nixos-rebuild"
+	nixos-rebuild "$@" || _notify "Error" "nixos-rebuild exited with errors"
 fi
 
 if [ "${PERSISTENT-}" ]; then

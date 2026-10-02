@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -o pipefail
+
 # Script for automating various checks and git actions for the repo.
 _log() {
 	printf "%s %s\n" "$(date +%F\ %T)" "$1" >>"$LOG_FILE"
@@ -178,7 +180,7 @@ while :; do
 
 	"build testmonkeys")
 		# TODO add more testmonkeys
-		nh os build ".#testmonkey" || exit 1
+		2>&1 nixos-rebuild build --flake ".#testmonkey" | nom || exit 1
 		exit 0
 		;;
 
@@ -374,7 +376,7 @@ while :; do
 			fi
 
 			for host in $HOSTS; do
-				nh os build ".#$host" || {
+				2>&1 nixos-rebuild build --flake ".#$host" | nom || {
 					_notify "Warning" "CI Build failed for $host from $GLOBE_DIR."
 					y_or_n "continue checks?" || {
 						_restore_flake
