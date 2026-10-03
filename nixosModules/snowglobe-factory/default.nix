@@ -155,8 +155,10 @@ in
 
     # enable tools / software and their configurations
     programs = {
-      # use neovim and alias vim to it by default
-      vim.enable = slib.setDefault false;
+      # install vim by default
+      vim.enable = slib.setDefault true;
+      # alias vim to neovim if neovim is enabled and vim is disabled
+      neovim.vimAlias = slib.setDefault (!config.programs.vim.enable);
       # nix version diff
       nvd.enable = slib.setDefault true;
       # nix-output-monitor for more fancy, verbose nix build logging.
@@ -171,12 +173,6 @@ in
       ncdu.enable = slib.setDefault true;
       # terminal multiplexer
       tmux.enable = slib.setDefault true;
-      # alias to neovim if enabled
-      neovim = {
-        enable = slib.setDefault true;
-        viAlias = slib.setDefault true;
-        vimAlias = slib.setDefault (!config.programs.vim.enable);
-      };
       # give otp support for 2fa with pass
       password-store.package = slib.setDefault (pkgs.pass.withExtensions (exts: [ exts.pass-otp ]));
       # system information
