@@ -15,6 +15,18 @@ in
     };
   };
 
+  floaterm-vim = buildVimPlugin {
+    pname = "floaterm.vim";
+    version = "0-unstable";
+    repo = "vim-floaterm";
+    src = fetchFromGitHub {
+      owner = "voldikss";
+      repo = "vim-floaterm";
+      rev = "7712701c5d20a0f9c935fbc2a6334083ce89b558";
+      hash = "sha256-t9XI0REUPz3P0b7L6BPWIliU23uoETxeUtELCZiNIuE=";
+    };
+  };
+
   tuxedo-nvim = buildVimPlugin {
     pname = "tuxedo.nvim";
     version = "06.11.2026";

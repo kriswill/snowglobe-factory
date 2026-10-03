@@ -13,3 +13,4 @@ in
   helium = callPackage ./helium/package.nix { };
   # niko-oneshot-cursors = callPackage ./niko-oneshot-cursors/package.nix { };
 }
+// import ./vimPlugins { inherit pkgs; }

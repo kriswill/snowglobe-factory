@@ -156,12 +156,6 @@ This can be disabled with `services.flatpak.enable = false`
 **Firewall** - The system has a firewall enabled by default that disables replies to ICMP packets.
 
 
-**Nix-index-database and comma** - Installs the following CLI tools:
-- nix-locate - locates libraries or program binaries in nixpkgs from your terminal instead of a web-browser.
-- nix-index-database - Updates the database.
-- , - literally just a comma. Searches the database for a program binary within nixpkgs from the provided name and runs it.
-
-
 **nix functions**
 - mkProgramOption - creates a program option, allowing you to use the wrapper for programs that may not be included in the base repo.
 - installProgram - used to implement the defined program options from mkProgramOption.

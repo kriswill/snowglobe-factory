@@ -6,15 +6,14 @@
 }:
 let
   cfg = config.snowglobe-factory.timezone-detector;
-  cfgs = config.services;
 in
 {
   options.snowglobe-factory.timezone-detector = {
-    enable = lib.mkEnableOption "Module to automatically detect and set the timezone based on your geolocation. Uses services.tzupdate.";
-    dispatcherTimeout = lib.mkOption {
-      description = "time in seconds that tzupdate should spend querying the api servers from the networkmanager dispatcher script before giving up.";
-      type = lib.types.int;
-      default = 10;
+    enable = lib.mkEnableOption "Module to automatically detect and set the timezone based on your geolocation.";
+    server = lib.mkOption {
+      description = "API server to use";
+      type = lib.types.str;
+      default = "https://ipapi.co/timezone";
     };
   };
 
@@ -29,7 +28,7 @@ in
         source = pkgs.writeText "update-timezone" ''
           case "$2" in
             "connectivity-change")
-              timedatectl set-timezone "$(${pkgs.tzupdate}/bin/tzupdate -p -s ${toString cfg.dispatcherTimeout})" || exit 1
+              timedatectl set-timezone "$(curl --fail ${cfg.server})"
               ;;
           esac
         '';
