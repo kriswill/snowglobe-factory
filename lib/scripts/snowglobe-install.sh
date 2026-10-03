@@ -692,7 +692,6 @@ _set_optional_profiles() {
 		y_or_n "Install programs for office work? (libreoffice, email client, local CUPS printing server, etc?)" default="no" && _enable_profile "office"
 	fi
 	y_or_n "Install penetration and security testing tools from Kali Linux? (nmap, tor-browser, john-the-ripper, wireshark, etc)" default="no" && _enable_profile "hacker-mode"
-	y_or_n "Install additional nix tools? (recommended for developers)" default="no" && _enable_profile "nix-tools"
 	y_or_n "Would you like to harden your configuration? This disables some features like password-based ssh authentication and mutable user configuration for increased security. (recommended for public facing servers)" default="no" && _enable_profile "harden"
 }
 

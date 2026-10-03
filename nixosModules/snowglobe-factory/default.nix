@@ -189,8 +189,6 @@ in
       snowglobe-rebuild.enable = slib.setDefault true;
       # open source version control system
       git.enable = slib.setDefault true;
-      # TUI for managing git operations
-      lazygit.enable = slib.setDefault config.programs.git.enable;
       # that one shell that people always use
       zsh = {
         enable = slib.setDefault true;
