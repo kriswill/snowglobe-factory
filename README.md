@@ -1,7 +1,7 @@
 # Snowglobe Factory - A NixOS fleet generator and manager
 
 This repository contains my shareable NixOS modules, custom package patches, and automation scripts that aim to improve upon NixOS and make the distribution accessible to more people.
-It currently daily drives [my workstations and servers](https://codeberg.org/earthgman/dotfiles) and several hosts operated by friends and family.
+It currently daily drives [my workstations, servers](https://codeberg.org/earthgman/dotfiles) and several hosts operated by friends and family.
 
 It is designed for x86_64 AMD/Intel systems built for desktop use or homelab servers.
 
@@ -10,13 +10,13 @@ Whether you are an experienced NixOS user, a distro hopper looking for the best 
 
 # What you get
 
-**Guided Installation** - I don't expect you to be a NixOS, or Linux expert to install or use your computer.
+**Guided Installation** - I don't expect you to be a NixOS, or Linux expert to install or use your operating system.
 The installation script ensures that users receive both a secure and functional system when choosing the default answers to the provided questions.
 
 
 **Flakes by default** - Unlike vanilla NixOS, this project enables and utilizes nix flakes for managing your nix modules and NixOS configurations.
 Several templates are provided that give some guidance for managing your flake inputs, modules, NixOS configurations, packages, overlays, and development shells.
-This template is used with the installer to seamlessly integrate any new host that installs NixOS with your existing nix flake.
+This template is used with the installer to seamlessly integrate any new host that installs NixOS with your existing nix flake and its configurations.
 Unlike other NixOS frameworks, this project does not require users to retain the provided setup or directory structure for modules to function.
 However, keep in mind that changing the layout may break the installer's host integration feature.
 
@@ -41,7 +41,7 @@ For the programs that I commonly use, I provide quick updates for them using an 
 Updating nixos-unstable can result in a package that your configuration depends on failing to build, thus you are unable to update and your Saturday is ruined.
 During the weekly flake update, the CI script will attempt to build all programs and NixOS configurations currently registered with the build system.
 The configurations tested include all supported FOSS program options, desktop environments, and the wide variety of NixOS configurations from friends and family.
-I can then provide fixes for the failing package builds from nixpkgs using an overlay before releasing an update.
+I can then provide fixes for any failing package builds from nixpkgs using an overlay before releasing an update.
 This ensures that users receive up-to-date packages and never have to deal with update failures.
 
 
@@ -242,3 +242,48 @@ outputs = { nixpkgs, snowglobe-factory, ... }: {
   };
 }
 ```
+
+# Post Install Tips
+
+Configuration is installed to /etc/nixos. By default it is owned by the root user and therefore only modifiable with privilege escalation programs (sudo, run0, etc).
+You may wish to change ownership of this directory to your underprivileged user so you can more easily modify and perform git operations with your configuration.
+To do so run `sudo chown -R yourusernamehere:users /etc/nixos`
+
+The generated age private key for sops-nix is located at /root/.config/sops/age/keys.txt. This means that it will still require root privileges to decrypt any secrets stored in secrets.yaml.
+It is recommended that you never allow underprivileged users access to this key, as it can compromise your system.
+Don't forget to create a backup of this key in a secure location!
+
+The installer does not configure a git repository at /etc/nixos, but it is highly recommended that you do so.
+Using git and snowglobe-rebuild allows you to easily track and roll back any changes as your system upgrades.
+
+# Security
+
+Setting `programs.password-store.enable = true` (for CLI) or `programs.qtpass.enable = true` (GUI) will help with securly managing your online passwords or other secrets.
+These programs operate by storing encrypted files locally on your machine using gnupg.
+Unlike commercial password managers, these programs are free, highly customizable, have no intentional backdoors, and never send the password files to the cloud.
+
+By default, the configuration allows unfree/closed source software to be installed. This software is generally considered a security risk, since its source code cannot be audited.
+If you wish to have a purely open-source and auditable system setting `nixpkgs.config.allowUnfree = false` will ensure that no software with an unfree license can be installed on your system through nixpkgs.
+NOTE: This is not a silver bullet! Always audit whatever you plan to install before doing so.
+
+Despite popular belief, the Unix permission system developed in the 1970s and used by default for a majority Linux distributions begins to break down against modern threats, especially systems with a single user on a desktop.
+Any program your user runs: browsers, games, or malware has access to read or write anything your user owns (your private ssh keys, work documents, pictures, bank statements, and your password spreadsheet).
+The installer allows you to create and set permissions of as many underprivileged users as you wish. If you have strict security requirements, I recommend creating many users each with their own home directory for different purposes.
+If you still choose to use a single user, ensure that you encrypt any important documents and keys using programs like password-store, ssh-agent and gpg/gnupg-agent.
+
+# Installing software not in nixpkgs
+
+If you chose a desktop environment, flatpak is enabled by default. Gnome-software is used for all desktops except KDE (which uses discover).
+You may need to add flathub for apps to appear in the GUI
+Use:
+`flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo`
+WARNING: some software may not work properly if it is installed through flatpak, though this is unlikely. Prefer to use nixpkgs if you are able.
+
+For precompiled Linux software, It is not possible to run these natively on NixOS due to the location of the linker and dynamic libraries referenced not being in the expected locations from an FHS compliant system.
+You can mitigate this issue with steam or the FOSS alternative, lutris, by using the FHS compliant virtual environment provided by them.
+Alternatively you can use `steam-run` for a CLI solution.
+
+For windows software, both lutris and steam provide the wine/proton compatibility layer that works with a majority of software and games.
+`programs.protonup-qt.enable = true` provides a GUI solution for managing different proton versions installed on your system.
+Unfortunately, some multi-billion dollar corporations may not have the monetary resources or AI a- I MEAN HARD-WORKING DEVELOPERS to add Linux/wine support for their product's codebase.
+Always do research before purchasing any software.
