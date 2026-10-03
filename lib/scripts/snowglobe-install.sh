@@ -330,7 +330,7 @@ _format_disks() {
 						--disabled \
 						--border \
 						--border-label-pos 1:bottom \
-						--preview="bat -f $DISKO_CONFIGURATIONS_DIR/{}" \
+						--preview="cat $DISKO_CONFIGURATIONS_DIR/{}" \
 						--border-label='Found the following custom configurations.'
 				)"
 				if [ ! "${SELECTED-}" ]; then

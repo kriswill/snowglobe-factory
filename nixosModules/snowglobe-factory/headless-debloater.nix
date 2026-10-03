@@ -38,7 +38,6 @@
 
     programs = {
       git.package = lib.mkDefault pkgs.gitMinimal;
-      command-not-found.enable = lib.mkDefault false;
     };
   };
 }
