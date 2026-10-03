@@ -265,6 +265,8 @@ Any program your user runs: browsers, games, or malware has access to read or wr
 The installer allows you to create and set permissions of as many underprivileged users as you wish. If you have strict security requirements, I recommend creating many users each with their own home directory for different purposes.
 If you still choose to use a single user, ensure that you encrypt any important documents and keys using programs like password-store, ssh-agent and gpg/gnupg-agent.
 
+If you plan to use your machine explicitly for desktop, you may wish to set `services.openssh.enable = false` to completely disable the openssh server.
+
 # Installing software not in nixpkgs
 
 If you chose a desktop environment, flatpak is enabled by default. Gnome-software is used for all desktops except KDE (which uses discover).
