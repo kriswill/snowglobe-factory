@@ -30,8 +30,8 @@
     After = [ "graphical-session.target" ];
     ConditionEnvironment = lib.mkIf (waylandDependent) "WAYLAND_DISPLAY";
     # prevent infinite restarts
-    StartLimitIntervalSec = 10;
-    StartLimitBurst = 2;
+    StartLimitIntervalSec = 30;
+    StartLimitBurst = 3;
 
     Description = serviceName + extraDescription;
     Requisite = [ "graphical-session.target" ];
