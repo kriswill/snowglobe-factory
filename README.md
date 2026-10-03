@@ -1,7 +1,7 @@
 # Snowglobe Factory - A NixOS fleet generator and manager
 
 This repository contains my shareable NixOS modules, custom package patches, and automation scripts that aim to improve upon NixOS and make the distribution accessible to more people.
-It currently daily drives [my workstations and servers](https://codeberg.org/earthgman/dotfiles) and several hosts operated by friends and family.
+It currently daily drives [my workstations, servers](https://codeberg.org/earthgman/dotfiles) and several hosts operated by friends and family.
 
 It is designed for x86_64 AMD/Intel systems built for desktop use or homelab servers.
 
@@ -258,22 +258,25 @@ Using git and snowglobe-rebuild allows you to easily track and roll back any cha
 
 # Security
 
-Setting `programs.password-store.enable = true` (for CLI) or `programs.qtpass.enable = true` (GUI) will help with managing your online passwords or other secrets.
-These programs operate by storing encrypted files locally on your machine using gnupg. Unlike commercial password managers, these programs are free and your encrypted passwords are never sent to the cloud.
+Setting `programs.password-store.enable = true` (for CLI) or `programs.qtpass.enable = true` (GUI) will help with securly managing your online passwords or other secrets.
+These programs operate by storing encrypted files locally on your machine using gnupg.
+Unlike commercial password managers, these programs are free, highly customizable, have no intentional backdoors, and never send the password files to the cloud.
 
 By default, the configuration allows unfree/closed source software to be installed. This software is generally considered a security risk, since its source code cannot be audited.
 If you wish to have a purely open-source and auditable system setting `nixpkgs.config.allowUnfree = false` will ensure that no software with an unfree license can be installed on your system through nixpkgs.
 NOTE: This is not a silver bullet! Always audit whatever you plan to install before doing so.
 
-Despite popular belief, the default Unix permission system developed in the 1970s used by Linux distributions begins to break down against modern threats, especially systems with a single user on a desktop.
-Any program you run, browser, game, or malware has access to anything your user owns (your private ssh keys, work documents, bank statements, or your password spreadsheet) even if it doesn't strictly need them.
-The installer allows you to create and configure permission of as many underprivileged users as you wish. If you have strict security requirements, I recommend creating many users each with their own home directory for different purposes.
+Despite popular belief, the Unix permission system developed in the 1970s and used by default for a majority Linux distributions begins to break down against modern threats, especially systems with a single user on a desktop.
+Any program your user runs: browsers, games, or malware has access to read or write anything your user owns (your private ssh keys, work documents, pictures, bank statements, and your password spreadsheet).
+The installer allows you to create and set permissions of as many underprivileged users as you wish. If you have strict security requirements, I recommend creating many users each with their own home directory for different purposes.
+If you still choose to use a single user, ensure that you encrypt any important documents and keys using programs like password-store, ssh-agent and gpg/gnupg-agent.
 
 # Installing software not in nixpkgs
 
 If you chose a desktop environment, flatpak is enabled by default. Gnome-software is used for all desktops except KDE (which uses discover).
 You may need to add flathub for apps to appear in the GUI
-Use: `flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo`
+Use:
+`flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo`
 WARNING: some software may not work properly if it is installed through flatpak, though this is unlikely. Prefer to use nixpkgs if you are able.
 
 For precompiled Linux software, It is not possible to run these natively on NixOS due to the location of the linker and dynamic libraries referenced not being in the expected locations from an FHS compliant system.
