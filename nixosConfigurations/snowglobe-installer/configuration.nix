@@ -79,13 +79,4 @@
       # "zfs"
     ];
   };
-
-  programs = {
-    zsh.enable = true;
-    # allow signing in to git for private repositories
-    gh.enable = true;
-
-    # declarative formatting of disks using nix files
-    disko.enable = true;
-  };
 }

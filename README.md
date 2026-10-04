@@ -116,7 +116,6 @@ Warning: Nvidia GPUs have not been thoroughly tested.
 - Office - Install libreoffice, thunderbird email client, and a preconfigured CUPS printing server with common FOSS printing drivers already available.
 - Hacker Mode - Installs many tools from Kali Linux like wireshark, tor-browser, nmap and zenmap, ghidra, metasploit and more.
 - Gaming - Installs and configures Steam, lutris, and proton/wine management utilities.
-- Nix Tools - Install and configure tools for working with projects using nix (like direnv).
 - Harden - Provides a hardened configuration for public facing servers. Disables mutable users and prevents SSH password login by default.
 
 
