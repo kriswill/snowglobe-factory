@@ -50,8 +50,6 @@
               outputs.nixosModules.nixos
               # improved disk partition management
               inputs.disko.nixosModules.default
-              # project providing cli indexing
-              inputs.nix-index-database.nixosModules.default
 
               # inputs.xlibre-overlay.nixosModules.overlay-xlibre-xserver
               # inputs.xlibre-overlay.nixosModules.overlay-all-xlibre-drivers
@@ -91,20 +89,9 @@
       url = "https://flakehub.com/f/NixOS/nixos-hardware/*.tar.gz";
     };
 
-    nix-index-database = {
-      url = "github:nix-community/nix-index-database";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # TODO currently test driving will add later
-    # xlibre-overlay = {
-    #   url = "git+https://codeberg.org/takagemacoed/xlibre-overlay?ref=dev-26.11";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
 }

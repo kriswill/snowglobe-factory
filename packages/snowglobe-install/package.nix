@@ -4,7 +4,6 @@
   lib,
   writeShellApplication,
   gitMinimal,
-  bat,
   gnused,
   disko,
   sops,
@@ -22,7 +21,6 @@ writeShellApplication {
   runtimeInputs = [
     gitMinimal
     fzf
-    bat
     openssh
     disko
     sops

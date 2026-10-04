@@ -122,7 +122,7 @@ in
     environment = {
       # use dash as /bin/sh of choice
       # override weights are hardcoded into nixpkgs using lib.mkDefault
-      binsh = slib.overrideNixpkgsDefault "${pkgs.yash}/bin/yash";
+      binsh = slib.overrideNixpkgsDefault "${pkgs.dash}/bin/dash";
 
       # these are not set properly on nixos by default for some reason
       # TODO check on status of this: https://github.com/NixOS/nixpkgs/issues/286283
@@ -155,18 +155,10 @@ in
 
     # enable tools / software and their configurations
     programs = {
-      # use neovim and alias vim to it by default
-      vim.enable = slib.setDefault false;
-      # cat with colorized output
-      bat.enable = slib.setDefault true;
-      # brightness control
-      brightnessctl.enable = slib.setDefault true;
-      # easily search through nixpkgs and try out software without actually installing it persistently
-      # use , programname
-      nix-index-database = {
-        enable = slib.setDefault true;
-        comma.enable = slib.setDefault true;
-      };
+      # install vim by default
+      vim.enable = slib.setDefault true;
+      # alias vim to neovim if neovim is enabled and vim is disabled
+      neovim.vimAlias = slib.setDefault (!config.programs.vim.enable);
       # nix version diff
       nvd.enable = slib.setDefault true;
       # nix-output-monitor for more fancy, verbose nix build logging.
@@ -175,16 +167,12 @@ in
       obs-studio.enableVirtualCamera = slib.setDefault true;
       # declarative disk partitioning tool
       disko.enable = slib.setDefault true;
+      # dns utils
+      dig.enable = slib.setDefault true;
       # bloat finder
       ncdu.enable = slib.setDefault true;
       # terminal multiplexer
       tmux.enable = slib.setDefault true;
-      # alias to neovim if enabled
-      neovim = {
-        enable = slib.setDefault true;
-        viAlias = slib.setDefault true;
-        vimAlias = slib.setDefault (!config.programs.vim.enable);
-      };
       # give otp support for 2fa with pass
       password-store.package = slib.setDefault (pkgs.pass.withExtensions (exts: [ exts.pass-otp ]));
       # system information
@@ -193,10 +181,6 @@ in
       file.enable = slib.setDefault true;
       # very good picker tool for CLI
       fzf.enable = slib.setDefault true;
-      # make ls output prettier
-      eza.enable = slib.setDefault true;
-      # json query tool
-      jq.enable = slib.setDefault true;
       # better top
       btop.enable = slib.setDefault true;
       # fuzzy finder and manager for systemd units
@@ -205,14 +189,6 @@ in
       snowglobe-rebuild.enable = slib.setDefault true;
       # open source version control system
       git.enable = slib.setDefault true;
-      # TUI for managing git operations
-      lazygit.enable = slib.setDefault config.programs.git.enable;
-      # better grep
-      ripgrep.enable = slib.setDefault true;
-      # tui file manager
-      yazi.enable = slib.setDefault true;
-      # cli archive maker
-      zip.enable = slib.setDefault true;
       # that one shell that people always use
       zsh = {
         enable = slib.setDefault true;

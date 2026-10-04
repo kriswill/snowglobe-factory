@@ -42,11 +42,6 @@ in
           wlr-randr.enable = slib.setDefault true;
           # graphical display control gui written in GTK
           wdisplays.enable = slib.setDefault true;
-          # notification daemon for wayland
-          swaync = {
-            enable = slib.setDefault true;
-            systemd.enable = slib.setDefault true;
-          };
           # session and application manager for wayland under systemd
           # Some sessions (like niri) will not use this, but it doesn't hurt to install it anyway
           uwsm.enable = slib.setDefault true;

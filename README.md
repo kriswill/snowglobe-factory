@@ -116,7 +116,6 @@ Warning: Nvidia GPUs have not been thoroughly tested.
 - Office - Install libreoffice, thunderbird email client, and a preconfigured CUPS printing server with common FOSS printing drivers already available.
 - Hacker Mode - Installs many tools from Kali Linux like wireshark, tor-browser, nmap and zenmap, ghidra, metasploit and more.
 - Gaming - Installs and configures Steam, lutris, and proton/wine management utilities.
-- Nix Tools - Install and configure tools for working with projects using nix (like direnv).
 - Harden - Provides a hardened configuration for public facing servers. Disables mutable users and prevents SSH password login by default.
 
 
@@ -154,12 +153,6 @@ This can be disabled with `services.flatpak.enable = false`
 
 
 **Firewall** - The system has a firewall enabled by default that disables replies to ICMP packets.
-
-
-**Nix-index-database and comma** - Installs the following CLI tools:
-- nix-locate - locates libraries or program binaries in nixpkgs from your terminal instead of a web-browser.
-- nix-index-database - Updates the database.
-- , - literally just a comma. Searches the database for a program binary within nixpkgs from the provided name and runs it.
 
 
 **nix functions**
@@ -270,6 +263,8 @@ Despite popular belief, the Unix permission system developed in the 1970s and us
 Any program your user runs: browsers, games, or malware has access to read or write anything your user owns (your private ssh keys, work documents, pictures, bank statements, and your password spreadsheet).
 The installer allows you to create and set permissions of as many underprivileged users as you wish. If you have strict security requirements, I recommend creating many users each with their own home directory for different purposes.
 If you still choose to use a single user, ensure that you encrypt any important documents and keys using programs like password-store, ssh-agent and gpg/gnupg-agent.
+
+If you plan to use your machine explicitly for desktop, you may wish to set `services.openssh.enable = false` to completely disable the openssh server.
 
 # Installing software not in nixpkgs
 
