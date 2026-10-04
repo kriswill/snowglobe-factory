@@ -122,7 +122,7 @@ in
     environment = {
       # use dash as /bin/sh of choice
       # override weights are hardcoded into nixpkgs using lib.mkDefault
-      binsh = slib.overrideNixpkgsDefault "${pkgs.yash}/bin/yash";
+      binsh = slib.overrideNixpkgsDefault "${pkgs.dash}/bin/dash";
 
       # these are not set properly on nixos by default for some reason
       # TODO check on status of this: https://github.com/NixOS/nixpkgs/issues/286283
