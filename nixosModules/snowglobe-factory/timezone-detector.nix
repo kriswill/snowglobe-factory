@@ -18,9 +18,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # provide the utility to the system PATH
-    environment.systemPackages = [ pkgs.tzupdate ];
-
     # use networkmanager to set the timezone when the network connectivity updates
     networking.networkmanager.dispatcherScripts = [
       {
@@ -28,7 +25,7 @@ in
         source = pkgs.writeText "update-timezone" ''
           case "$2" in
             "connectivity-change")
-              timedatectl set-timezone "$(curl --fail ${cfg.server})"
+              timedatectl set-timezone "$(${pkgs.curl}/bin/curl --fail ${cfg.server})"
               ;;
           esac
         '';
