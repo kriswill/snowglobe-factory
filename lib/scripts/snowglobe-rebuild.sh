@@ -152,7 +152,7 @@ _commit_flake_lock() {
 	fi
 }
 
-if [ "${GIT_REPO_PRESENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
+if [ "${GIT_REPO_PRESENT-}" ] && [ "${PERSISTENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
 	# bail if flake directory is not owned by the current user.
 	# TODO I dont really like this behavior in very specific situations but it should be fine for now.
 	[ "$WHOAMI" = "$FLAKE_DIR_OWNER" ] || _notify "Error" "$FLAKE_DIR is not owned by the current user invoking $SCRIPT_NAME. Git operations cannot continue safely."
@@ -184,13 +184,12 @@ if [ "${GIT_REPO_PRESENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
 			fi
 		else
 			_restore_git_stash
-			[ "${PERSISTENT-}" ] && _notify "Error" "Git synchronization operations should not fail for persistent changes. Try switching configuration using '$SCRIPT_NAME test' until git issues are resolved."
 			y_or_n "Continue without git synchronization features?" || _errormsg "Aborted"
 			IGNORE_GIT_SYNCHRONIZATION=1
 		fi
 	fi
 
-	if [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ] && [ "${DIRTY_WORKTREE-}" ] && [ "${PERSISTENT-}" ]; then
+	if [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ] && [ "${DIRTY_WORKTREE-}" ]; then
 		SELECTED_OPTION=$(
 			printf "Commit (recommended)\nStash\nAbort" |
 				fzf \
@@ -221,8 +220,10 @@ if [ "${GIT_REPO_PRESENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
 	fi
 fi
 
-[ "${TARGET_HOST-}" ] || TARGET_HOST="$(cat /etc/hostname)"
-[ "${TARGET_HOST-}" ] || _notify "Error" "Failed to retrieve hostname from /etc/hostname."
+if [ ! "${TARGET_HOST-}" ]; then
+	TARGET_HOST="$(cat /etc/hostname)"
+	[ "${TARGET_HOST-}" ] || _notify "Error" "Failed to retrieve hostname from /etc/hostname."
+fi
 
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}"
 SCRIPT_RUNTIME_DIR="$XDG_RUNTIME_DIR/$SCRIPT_NAME"
@@ -258,7 +259,9 @@ else
 fi
 
 if [ "${PERSISTENT-}" ]; then
-	[ "${GIT_REPO_PRESENT-}" ] && _commit_flake_lock
+	if [ "${GIT_REPO_PRESENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
+		_commit_flake_lock
+	fi
 	if [ ! -e "$UPDATE_LOG_FILE" ]; then
 		touch "$UPDATE_LOG_FILE" >/dev/null 2>&1 || $ELEVATION_PROGRAM touch "$UPDATE_LOG_FILE"
 	fi
