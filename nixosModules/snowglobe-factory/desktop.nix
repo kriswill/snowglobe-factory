@@ -127,10 +127,6 @@ in
           hardinfo2.enable = slib.setDefault true;
           # secrets daemon frontend for gnome-keyring
           seahorse.enable = slib.setDefault config.services.gnome.gnome-keyring.enable;
-          # image converter
-          switcheroo.enable = slib.setDefault true;
-          # simple video trimmer
-          video-trimmer.enable = slib.setDefault true;
           # xdg utilites for desktop shell scripting
           xdg-user-dirs.enable = slib.setDefault true;
           xdg-utils.enable = slib.setDefault true;
