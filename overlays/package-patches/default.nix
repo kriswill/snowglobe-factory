@@ -4,28 +4,6 @@
   prev,
 }:
 {
-  # ran into this: https://github.com/j-evins/glabels-qt/issues/256
-  # the current nixpkgs version is very old for some reason.
-  glabels-qt = prev.glabels-qt.overrideAttrs (old: {
-    version = "unstable-2026-05-24";
-    src = prev.fetchFromGitHub {
-      owner = "j-evins";
-      repo = "glabels-qt";
-      tag = "3.99-master638";
-      hash = "sha256-oi9WOzt3o+5QpfHeosCnbvDmLirE7jXaQUJ5ADd3LY4=";
-    };
-  });
-
-  ani-cli = prev.ani-cli.overrideAttrs (old: {
-    version = "5.1";
-    src = prev.fetchFromGitHub {
-      owner = "pystardust";
-      repo = "ani-cli";
-      tag = "v5.1";
-      hash = "sha256-lPQA3iO3F/9NS2IziQccsJ3aai6WMQy6YObdB3mDCZA=";
-    };
-  });
-
   # freetube = prev.freetube.overrideAttrs (old: rec {
   #   version = "0.25.3";
   #   src = prev.fetchFromGitHub {
