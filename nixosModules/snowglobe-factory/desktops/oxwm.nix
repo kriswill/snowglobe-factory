@@ -13,7 +13,6 @@ in
     lib.mkEnableOption "snowglobe-factory's oxwm module";
 
   config = lib.mkIf cfg.enable {
-    snowglobe-factory.system.hasDesktop = lib.mkForce true;
     snowglobe-factory.desktop = {
       enable = lib.mkForce true;
     };

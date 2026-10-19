@@ -14,7 +14,6 @@ in
   config = lib.mkIf cfg.enable {
     snowglobe-factory = {
       desktop.enable = true;
-      system.hasDesktop = lib.mkForce true;
     };
     environment.xfce.excludePackages = builtins.attrValues {
       inherit (pkgs)

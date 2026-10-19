@@ -14,7 +14,6 @@ in
 
   config = lib.mkIf cfg.enable {
     snowglobe-factory = {
-      system.hasDesktop = lib.mkForce true;
       desktop = {
         enable = true;
         installWaylandTools = true;
