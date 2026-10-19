@@ -56,6 +56,9 @@ in
       })
       # default configuration for all desktops
       {
+        # populate system attribute
+        snowglobe-factory.system.hasDesktop = lib.mkForce true;
+
         # fix blank screens in most java applications on some window managers.
         environment.sessionVariables._JAVA_AWT_WM_NONREPARENTING = slib.setDefault "1";
         # change the default display-manager from lightdm to ly. Runs on tty instead of x11 or wayland compositor.
