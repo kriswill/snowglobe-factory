@@ -14,7 +14,6 @@ in
 
   config = lib.mkIf cfg.enable {
     snowglobe-factory = {
-      system.hasDesktop = lib.mkForce true;
       desktop = {
         enable = true;
       };
@@ -85,8 +84,6 @@ in
     programs = {
       # disable pwvucontrol in favor of the default plasma volume control
       pwvucontrol.enable = slib.overrideDefault false;
-      # kde has its own notepad
-      mousepad.enable = slib.overrideDefault false;
       # disable gnome-disks in favor of kde-partition-manager
       gnome-disks.enable = slib.overrideDefault false;
       partition-manager.enable = slib.setDefault true;

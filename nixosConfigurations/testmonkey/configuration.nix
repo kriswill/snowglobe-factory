@@ -34,6 +34,7 @@ in
       labwc.enable = true;
       # kde.enable = true;
       hyprland.enable = true;
+      # xfce.enable = true;
     };
     qemu.enable = true;
     profiles = {
