@@ -6,6 +6,7 @@
 }:
 let
   cfg = config.snowglobe-factory.desktop.xfce;
+  slib = import ../../../lib/module-wrappers.nix { inherit lib; };
 in
 {
   options.snowglobe-factory.desktop.xfce.enable =
@@ -15,12 +16,8 @@ in
     snowglobe-factory = {
       desktop.enable = true;
     };
-    environment.xfce.excludePackages = builtins.attrValues {
-      inherit (pkgs)
-        # prefer vlc as a media player
-        parole
-        ;
-    };
+
+    programs.vlc.enable = slib.overrideDefault false;
 
     services.xserver = {
       enable = true;
