@@ -9,6 +9,7 @@ let
   cfgs = config.services;
   cfgp = config.programs;
   slib = import ../../lib/functions/module-wrappers { inherit lib; };
+  isx86 = pkgs.stdenv.hostPlatform.isx86;
 in
 {
   options.snowglobe-factory.desktop = {
@@ -70,21 +71,17 @@ in
         # add openvpn plugin to networkmanager
         networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
-        # TODO detect if bluetooth hardware exists
-        # enable bluetooth by default
+        # enable bluetooth if hardware is present
         hardware.bluetooth.enable = slib.setDefault true;
         # GTK gui for bluetooth
         services.blueman.enable = slib.setDefault config.hardware.bluetooth.enable;
 
-        # use pipewire for the sound server
+        # use pulseaudio for the sound server by default
+        # if using any wayland desktop this is replaced by pipewire
         security.rtkit.enable = slib.setDefault true; # hands out realtime scheduling priority to user processes on demand. Improves performance of pulse
-        services.pipewire = {
-          # enables all backends by default
-          enable = slib.setDefault true;
-          alsa.enable = slib.setDefault true;
-          alsa.support32Bit = slib.setDefault true;
-          pulse.enable = slib.setDefault true;
-          jack.enable = slib.setDefault true;
+        services.pulseaudio = {
+          enable = slib.setDefault (!config.services.pipewire.enable);
+          support32Bit = slib.setDefault isx86;
         };
 
         # prevent xterm from being installed by enabling the xserver
@@ -111,9 +108,10 @@ in
           dconf-editor.enable = slib.setDefault config.programs.dconf.enable;
           # media player
           vlc.enable = slib.setDefault true;
-          # lightweight notepad clone from xfce
-          mousepad.enable = slib.setDefault true;
           # GTK management app for fonts icons cursors, etc for independent WMs
+          pavucontrol.enable = slib.setDefault (
+            config.services.pulseaudio.enable && (!config.services.pipewire.enable)
+          );
           pwvucontrol =
             let
               ifPipewirePulse = (cfgs.pipewire.enable && cfgs.pipewire.pulse.enable);
@@ -156,11 +154,9 @@ in
         };
 
         hardware.graphics = {
-          enable = true;
+          enable = slib.setDefault true;
           # 32 bit support doesn't exist on other arches
-          enable32Bit = lib.mkIf ((builtins.substring 0 3 config.nixpkgs.hostPlatform.system) == "x86") (
-            slib.setDefault true
-          );
+          enable32Bit = lib.mkIf isx86 (slib.setDefault true);
         };
       }
     ]
