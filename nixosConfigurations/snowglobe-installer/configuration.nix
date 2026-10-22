@@ -17,13 +17,14 @@
   };
 
   services.getty.helpLine = lib.mkForce ''
-    Welcome to the Snowglobe NixOS installer.
+    Snowglobe Factory installation / recovery ISO.
 
-    It is recommended to set password for the root user with `sudo passwd` to log in over ssh
+    Set a password for the root user with `sudo passwd` to log in over ssh.
+    This is recommended if you have private keys that you need to copy and paste.
 
-    If you are having trouble reading, use 'setfont -d' to double the font size.
+    If you are having trouble reading, you can use `setfont -d` to double the font size.
 
-    Begin install by running `install.sh` as root.
+    Begin installation by running `install.sh` as root.
   '';
 
   users.defaultUserShell = pkgs.zsh;
