@@ -6,7 +6,7 @@
 }:
 let
   cfg = config.snowglobe-factory.desktop.xfce;
-  slib = import ../../../lib/module-wrappers.nix { inherit lib; };
+  slib = import ../../../lib/functions/module-wrappers { inherit lib; };
 in
 {
   options.snowglobe-factory.desktop.xfce.enable =
