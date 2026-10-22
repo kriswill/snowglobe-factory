@@ -9,11 +9,10 @@
 }:
 let
   mkForce = lib.mkForce;
-  outputs = flake.outputs;
   enableAllModules =
     moduleType:
     let
-      moduleNames = (builtins.attrNames (builtins.readDir ../../nixosModules/nixos/${moduleType}));
+      moduleNames = (builtins.attrNames (builtins.readDir (flake + "nixosModules/nixos/${moduleType}")));
     in
     lib.genAttrs moduleNames (module: {
       enable = true;

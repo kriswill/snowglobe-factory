@@ -179,8 +179,9 @@ while :; do
 		;;
 
 	"build testmonkeys")
-		# TODO add more testmonkeys
-		2>&1 nixos-rebuild build --flake ".#testmonkey" | nom || exit 1
+		find "$PROJECT_ROOT/nixosConfigurations/testmonkeys" -type d -name "testmonkey-*" | while read -r monkey; do
+			2>&1 nixos-rebuild build --flake ".#$(basename "$monkey")" | nom || exit 1
+		done
 		exit 0
 		;;
 
