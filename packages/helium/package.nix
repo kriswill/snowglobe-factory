@@ -39,7 +39,7 @@
 }:
 
 let
-  version = "0.15.5.1";
+  version = "0.20.1.1";
 
   # nix system -> upstream asset suffix + tarball hash.
   # Refresh both hashes on every version bump:
@@ -47,11 +47,11 @@ let
   sources = {
     x86_64-linux = {
       suffix = "x86_64_linux";
-      hash = "sha256-80oe4aarLjEJ2S45OVEqN8/mii8NIwtSXMFYn8GS/Zc=";
+      hash = "sha256-ICP6RM76D70+GQcch+kNYSdfCLqPW0jVjCNSFVZem1M=";
     };
     aarch64-linux = {
       suffix = "arm64_linux";
-      hash = "sha256-2TI9B3GjdN5eWmZqfnVOIfKYwjjqwh345YaKx7X2TP4=";
+      hash = "sha256-IRqV4Qlg1is3Z1GSD7uTzf8FH1v8+hNrUulw9OaWNXc=";
     };
   };
 

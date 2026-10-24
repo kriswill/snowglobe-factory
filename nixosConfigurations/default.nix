@@ -54,10 +54,24 @@ in
     ];
   };
 
-  testmonkey = slib.mkNixosHost {
+  testmonkey-default = slib.mkNixosHost {
     hostname = "testmonkey";
     system = "x86_64-linux";
-    configDir = ./testmonkey;
+    configDir = ./testmonkeys/testmonkey-default;
+    specialArgs = { inherit flake; };
+  };
+
+  testmonkey-xfce = slib.mkNixosHost {
+    hostname = "testmonkey-xfce";
+    system = "x86_64-linux";
+    configDir = ./testmonkeys/testmonkey-xfce;
+    specialArgs = { inherit flake; };
+  };
+
+  testmonkey-kde = slib.mkNixosHost {
+    hostname = "testmonkey-kde";
+    system = "x86_64-linux";
+    configDir = ./testmonkeys/testmonkey-kde;
     specialArgs = { inherit flake; };
   };
 }

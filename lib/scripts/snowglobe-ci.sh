@@ -167,7 +167,7 @@ while :; do
 			[ "$PACKAGE_NAME" ] || _errormsg "No package name was entered."
 			while :; do
 				# build the package as it would apply in a nixos configuration
-				if ! nom build ".#nixosConfigurations.testmonkey.pkgs.$PACKAGE_NAME" -o "$PACKAGE_RESULTS/$PACKAGE_NAME"; then
+				if ! nom build ".#nixosConfigurations.testmonkey-default.pkgs.$PACKAGE_NAME" -o "$PACKAGE_RESULTS/$PACKAGE_NAME"; then
 					y_or_n "Package build failed. Try this build again?" || break
 				else
 					break
@@ -179,8 +179,9 @@ while :; do
 		;;
 
 	"build testmonkeys")
-		# TODO add more testmonkeys
-		2>&1 nixos-rebuild build --flake ".#testmonkey" | nom || exit 1
+		find "$PROJECT_ROOT/nixosConfigurations/testmonkeys" -type d -name "testmonkey-*" | while read -r monkey; do
+			2>&1 nixos-rebuild build --flake ".#$(basename "$monkey")" | nom || exit 1
+		done
 		exit 0
 		;;
 
