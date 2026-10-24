@@ -23,11 +23,6 @@ in
           motherboard = config.snowglobe-factory.system.cpu-vendor;
         };
 
-        hardware = {
-          # just in case
-          xone.enable = slib.setDefault true;
-        };
-
         programs = {
           # open source frontend for managing your games and emulators
           lutris.enable = slib.setDefault true;

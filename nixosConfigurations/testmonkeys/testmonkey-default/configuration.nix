@@ -12,7 +12,7 @@ let
   enableAllModules =
     moduleType:
     let
-      moduleNames = (builtins.attrNames (builtins.readDir (flake + "nixosModules/nixos/${moduleType}")));
+      moduleNames = (builtins.attrNames (builtins.readDir (flake + "/nixosModules/nixos/${moduleType}")));
     in
     lib.genAttrs moduleNames (module: {
       enable = true;
@@ -45,7 +45,7 @@ in
 
   # add all custom packages
   environment.systemPackages = lib.forEach (builtins.attrNames (
-    import ../../packages {
+    import ../../../packages {
       inherit flake pkgs;
     }
   )) (package: pkgs.${package});
