@@ -82,6 +82,8 @@ in
     };
 
     programs = {
+      # password-manager
+      qtpass.enable = slib.setDefault true;
       # disable pwvucontrol in favor of the default plasma volume control
       pwvucontrol.enable = slib.overrideDefault false;
       # disable gnome-disks in favor of kde-partition-manager
