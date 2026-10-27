@@ -29,6 +29,8 @@
   #   };
   # });
 
+	pywal16 = prev.callPackage ./pywal16.nix {  };
+
   # puddletag's icon is installed to the incorrect location
   # This causes some programs to display an empty icon entry
   puddletag = prev.puddletag.overrideAttrs (_: {
