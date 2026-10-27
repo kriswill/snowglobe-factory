@@ -12,15 +12,21 @@ in
 {
   options.snowglobe-factory.profiles.gaming = {
     enable = lib.mkEnableOption "utilities for that OOB Linux gaming experience";
+    enableNtSync = lib.mkOption {
+      description = "whether to install and use the ntsync kernel module";
+      default = lib.versionAtLeast config.boot.kernelPackages.kernel.version "6.14";
+      type = lib.types.bool;
+    };
   };
 
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
       {
+        boot.kernelModules = lib.mkIf cfg.enableNtSync [ "ntsync" ];
         # rgb control
         services.hardware.openrgb = {
           enable = slib.setDefault true;
-          motherboard = config.snowglobe-factory.system.cpu-vendor;
+          motherboard = config.snowglobe-factory.system.cpu-vendor or null;
         };
 
         programs = {
