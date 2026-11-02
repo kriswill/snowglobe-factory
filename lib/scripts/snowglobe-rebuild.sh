@@ -132,7 +132,6 @@ done
 
 cd "$FLAKE_DIR" || _notify "Error" "Could not change working directory to $FLAKE_DIR"
 
-UPDATE_LOG_FILE="$FLAKE_DIR/updates.log"
 FLAKE_DIR_OWNER="$(stat -c '%U' -L "$FLAKE_DIR")"
 WHOAMI="$(whoami)"
 
@@ -259,6 +258,12 @@ else
 fi
 
 if [ "${PERSISTENT-}" ]; then
+	if [ -d "$FLAKE_DIR/nixosConfigurations/$TARGET_HOST" ]; then
+		UPDATE_LOG_FILE="$FLAKE_DIR/nixosConfigurations/$TARGET_HOST/updates.log"
+	else
+		UPDATE_LOG_FILE="$FLAKE_DIR/updates.log"
+	fi
+
 	if [ "${GIT_REPO_PRESENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
 		_commit_flake_lock
 	fi
