@@ -146,6 +146,7 @@ WHOAMI="$(whoami)"
 # every time the flake lock updates, commit with git
 _commit_flake_lock() {
 	if git status | grep -q flake.lock; then
+		git reset HEAD -- . # ensure no other files are staged
 		git add flake.lock || _notify "Error" "Failed to add changes to flake.lock to git."
 		git commit -m "update flake.lock" || _notify "Error" "Failed to commit update to flake.lock"
 	fi
@@ -227,6 +228,11 @@ fi
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}"
 SCRIPT_RUNTIME_DIR="$XDG_RUNTIME_DIR/$SCRIPT_NAME"
 mkdir -p "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to create temporary configuration directory."
+
+# nix will complain of missing files if are not staged in git
+if [ "${GIT_REPO_PRESENT-}" ]; then
+	git add . || _errormsg "Failed to add files to git tree before rebuild."
+fi
 
 case "$1" in
 "switch" | "test" | "boot")
