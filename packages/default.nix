@@ -10,4 +10,3 @@ in
   star-pixel-icons = callPackage ./star-pixel-icons/package.nix { };
   helium = callPackage ./helium/package.nix { };
 }
-// import ./vimPlugins { inherit pkgs; }
