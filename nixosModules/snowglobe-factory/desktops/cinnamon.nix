@@ -17,7 +17,10 @@ in
       desktop.enable = true;
     };
 
-    programs.vlc.enable = slib.overrideDefault false;
+    programs = {
+      vlc.enable = slib.overrideDefault false;
+      pwvucontrol.enable = slib.overrideDefault false;
+    };
 
     services.xserver = {
       enable = true;
