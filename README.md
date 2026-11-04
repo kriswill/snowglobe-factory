@@ -243,6 +243,7 @@ You may wish to change ownership of this directory to your underprivileged user 
 To do so run `sudo chown -R yourusernamehere:users /etc/nixos`
 
 The generated age private key for sops-nix is located at /root/.config/sops/age/keys.txt. This means that it will still require root privileges to decrypt any secrets stored in secrets.yaml.
+Use: ```sudo sops /etc/nixos/nixosConfigurations/yourhostname/secrets.yaml``` to edit secrets for your host.
 It is recommended that you never allow underprivileged users access to this key, as it can compromise your system.
 Don't forget to create a backup of this key in a secure location!
 

@@ -157,33 +157,41 @@ _get_nixos_hardware_config() {
 	return 0
 }
 
+_install_errormsg() {
+	printf "\nInstallation Failed: %s\n" "$1"
+	printf "Edit configuration at /mnt/etc/nixos or make any changes as needed, then run the installer again.\n"
+	exit 1
+}
+
 _install_nixos() {
+	# tell the script that next time it runs, it should provide the option to jump to install
+	printf "%s" "$HOSTNAME" >/tmp/install_cookie
 	# /tmp will be cleared on bootup if nixos option boot.tmp.cleanOnBoot is set (which it is by default in my config)
 	if [ "${LOW_RAM-}" ] && [ ! -e /mnt/tmp/swap ]; then
 		# unless you are installing on a REALLY small drive, this will work fine
 		SWAPFILE="/mnt/tmp/swap"
 		printf "\nCreating a 4GB swap file at %s.\n" "$SWAPFILE"
 		mkdir -p /mnt/tmp
-		dd if=/dev/zero of="$SWAPFILE" bs=1024 count=4000000 || _errormsg "\nError: Unable to create swap file."
-		mkswap "$SWAPFILE" || _errormsg "Could not use mkswap on $SWAPFILE"
-		chmod 600 "$SWAPFILE" || _errormsg "Failed to change permissions for $SWAPFILE"
-		swapon "$SWAPFILE" || _errormsg "Could not activate the swap file with swapon."
+		dd if=/dev/zero of="$SWAPFILE" bs=1024 count=4000000 || _install_errormsg "\nError: Unable to create swap file."
+		mkswap "$SWAPFILE" || _install_errormsg "Could not use mkswap on $SWAPFILE"
+		chmod 600 "$SWAPFILE" || _install_errormsg "Failed to change permissions for $SWAPFILE"
+		swapon "$SWAPFILE" || _install_errormsg "Could not activate the swap file with swapon."
 		printf "Success: This file will be cleared upon next bootup and Zram swap will be enabled to ensure your system runs smoothly after install.\n"
 		unset SWAPFILE
 	fi
 
 	if [ -d "$CONFIG_ROOT/.git" ]; then
 		# avoid the infamous bug with nix flakes where if the new files are not added to git, they cannot be realized to the /nix/store
-		git -C "$CONFIG_ROOT" add "$CONFIG_ROOT" || _errormsg "git failed to add unstage files in $CONFIG_ROOT"
+		git -C "$CONFIG_ROOT" add "$CONFIG_ROOT" || _install_errormsg "git failed to add unstage files in $CONFIG_ROOT"
 	fi
 
 	printf "Installing NixOS\n"
 	if [ ! -d "$HOST_CONFIG_DIR/users" ]; then
 		# if no users have been configured, ensure root gets a password
 		# This password will not be declaratively stored with sops.
-		nixos-install --no-channel-copy --flake "$CONFIG_ROOT#$HOSTNAME" || _errormsg "\nERROR: Installation failed or aborted."
+		nixos-install --no-channel-copy --flake "$CONFIG_ROOT#$HOSTNAME" || _install_errormsg "nixos-rebuild"
 	else
-		nixos-install --no-channel-copy --no-root-password --flake "$CONFIG_ROOT#$HOSTNAME" || _errormsg "\nERROR: Installation failed or aborted."
+		nixos-install --no-channel-copy --no-root-password --flake "$CONFIG_ROOT#$HOSTNAME" || _install_errormsg "\nnixos-rebuild"
 	fi
 
 	y_or_n "Installation completed. Do you wish to reboot now?" && reboot
@@ -426,7 +434,6 @@ _install_existing() {
 	HOST_CONFIG_DIR="$CONFIG_ROOT/nixosConfigurations/$HOSTNAME"
 
 	_format_disks
-	_debugmsg "Hostname $HOSTNAME"
 
 	clear
 	if [ -z "$(ls -A /mnt)" ]; then
@@ -546,13 +553,24 @@ trap '_sigint_cleanup' INT
 DISKO_CONFIGURATIONS_DIR=${DISKO_CONFIGURATIONS_DIR:-"/etc/disko"}
 # directory which will be scanned for existing hosts
 REPO_DIR=${REPO_DIR:-"/tmp/your-globe"}
-SUPPORTED_DESKTOP_ENVIRONMENTS="XFCE|KDE|Oxwm|LabWC|Niri|Hyprland|None"
+SUPPORTED_DESKTOP_ENVIRONMENTS="XFCE|Cinnamon|KDE|Oxwm|LabWC|Niri|Hyprland|None"
 SUPPORTED_WEB_BROWSERS="Chromium|Helium|Brave|Firefox|Librewolf|Mullvad-Browser|Qutebrowser|None"
 
 CONFIG_ROOT="/mnt/etc/nixos"
 HOSTS_CONFIG_FILE="$CONFIG_ROOT/nixosConfigurations/default.nix"
 DEFAULT_MODULES_DIR="$CONFIG_ROOT/nixosModules/default"
 KEYRING_FILE="$DEFAULT_MODULES_DIR/keyring.nix"
+
+if [ -f "/tmp/install_cookie" ]; then
+	if y_or_n "Detected a failed install. Do you wish to attempt that installation again?"; then
+		nixos-install --no-channel-copy --no-root-password --flake "/mnt/etc/nixos#$(cat /tmp/install_cookie)" || exit 1
+		y_or_n "Installation completed. Do you wish to reboot now?" && reboot
+		exit 0
+	else
+		printf "\nRestarting Installation.\n"
+		rm /tmp/install_cookie
+	fi
+fi
 
 printf "\nYou are ready to begin installation.\n"
 
@@ -563,9 +581,42 @@ printf "As a general rule of thumb, If you are unsure what a question is asking,
 _confirm "Press any key to continue..."
 
 printf "\nIf you have used this installer before, You might have already configured a fleet of NixOS machines.\n"
-printf "With access to your remote git provider, you can re-install a previously configured host or seamlessly integrate this machine into your fleet.\n"
-if y_or_n "Do you wish to use a git repository that was derived from this installer?" default="no"; then
-	_clone_repo
+printf "Using your existing configuration repository, you can re-install a previously configured host or seamlessly integrate this machine into your fleet.\n"
+if y_or_n "Do you wish to use a configuration repository that was derived from this installer?" default="no"; then
+	while :; do
+		printf "\n"
+		printf "1. Use a flake from a remote git repository.\n"
+		printf "2. Use a flake from the local filesystem.\n"
+		printf "3. Abort\n"
+		printf "Your selection: "
+		read -r SELECTED
+		SELECTED="$(printf "%s" "$SELECTED" | tr -dc '[:digit:]')"
+		if [ ! "${SELECTED-}" ] || [ "${SELECTED}" -gt 3 ] || [ "${SELECTED}" -lt 1 ]; then
+			printf "Invalid selection. Try again.\n"
+			continue
+		else
+			break
+		fi
+	done
+
+	case "$SELECTED" in
+	"1") _clone_repo ;;
+	"2")
+		while :; do
+			printf "Enter a valid path: "
+			# variable used for cloning configuration to /mnt/etc/nixos
+			read -r REPO_DIR
+			[ -z "${REPO_DIR-}" ] && _errormsg "Aborted"
+			if [ ! -f "${REPO_DIR-}/flake.nix" ]; then
+				y_or_n "The provided path is not a valid configuration. Try again?" || _errormsg "Aborted"
+			else
+				break
+			fi
+		done
+		;;
+	"3") _errormsg "Aborted" ;;
+	esac
+
 	while :; do
 		printf "\n"
 		printf "1. Install/Repair this host with an existing configuration.\n"
@@ -574,7 +625,7 @@ if y_or_n "Do you wish to use a git repository that was derived from this instal
 		printf "Your selection: "
 		read -r SELECTED
 		SELECTED="$(printf "%s" "$SELECTED" | tr -dc '[:digit:]')"
-		if [ ! "${SELECTED-}" ] || [ "${SELECTED}" -gt 3 ]; then
+		if [ ! "${SELECTED-}" ] || [ "${SELECTED}" -gt 3 ] || [ "${SELECTED}" -lt 1 ]; then
 			printf "Invalid selection. Try again.\n"
 			continue
 		else
@@ -697,9 +748,10 @@ _set_optional_profiles() {
 
 _set_desktop_environment() {
 	[ "${DESKTOP_ENVIRONMENT-}" ] && unset DESKTOP_ENVIRONMENT
+	CINNAMON_DESCRIPTION="Feature rich desktop environment from Linux Mint."
 
-	XFCE_DESCRIPTION="Modular desktop using gimp toolkit version 3 (gtk3)
-for X11 that allows customization and replaceable components (such as the window manager).
+	XFCE_DESCRIPTION="Modular desktop using for X11 made up of several independent components.
+Each of these components (such as the window manager) can be replaced, promoting customization.
 Great for app compatibility and beginners who wish to branch out."
 
 	KDE_DESCRIPTION="A modern all inclusive desktop environment.
@@ -735,6 +787,7 @@ Uses infinite scrolling windows in a tiled format."
 				--preview "
 			case {} in
 				'XFCE') printf '$XFCE_DESCRIPTION' ;;
+				'Cinnamon') printf '$CINNAMON_DESCRIPTION' ;;
 				'KDE') printf '$KDE_DESCRIPTION' ;;
 				'Oxwm') printf '$OXWM_DESCRIPTION' ;;
 				'Niri') printf '$NIRI_DESCRIPTION' ;;
