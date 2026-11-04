@@ -23,9 +23,6 @@ in
       (lib.mkIf config.services.xserver.enable {
         programs = {
           xclip.enable = slib.setDefault true;
-          xwallpaper.enable = slib.setDefault true;
-          # screenshot tool
-          maim.enable = slib.setDefault true;
         };
       })
 

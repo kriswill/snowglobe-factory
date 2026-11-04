@@ -28,8 +28,6 @@ in
     slib.installProgram {
       inherit programName config;
       extraModules = {
-        # install lukeSmithXYZ mutt helper
-        programs.mutt-wizard.enable = slib.setDefault true;
         environment.systemPackages =
           let
             mutt-alias = slib.mkProgramAlias {
