@@ -74,4 +74,11 @@ in
     configDir = ./testmonkeys/testmonkey-kde;
     specialArgs = { inherit flake; };
   };
+
+	testmonkey-cinnamon = slib.mkNixosHost {
+		hostname = "testmonkey-cinnamon";
+		system = "x86_64-linux";
+		configDir = ./testmonkeys/testmonkey-cinnamon;
+		specialArgs = { inherit flake; };
+		};
 }
