@@ -1220,10 +1220,9 @@ if [ "${OPTIONAL_PROFILES-}" ]; then
 	unset IFS
 fi
 
-# disable the provided cache
-if [ "${CACHE_UNTRUSTED-}" ]; then
-	printf "\n# Don't trust the provided cache\n" >>"$HOST_CONFIG_FILE"
-	printf "substituters.\"nix-store.earthgman.dev\".enable = false;\n" >>"$HOST_CONFIG_FILE"
+if [ "${SNOWGLOBE_FACTORY_TRUST_CACHE-}" ]; then
+	printf "\n# enable the provided cache\n" >>"$HOST_CONFIG_FILE"
+	printf "snowglobe-factory.enableCache = true;\n" >>"$HOST_CONFIG_FILE"
 fi
 printf "}" >>"$HOST_CONFIG_FILE"
 

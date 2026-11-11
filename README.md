@@ -168,7 +168,7 @@ If you have never used NixOS before, the easiest installation method would be to
 https://www.earthgman.dev/assets/snowglobe-installers/
 
 - Images suffixed with -small do not contain firmware blobs from linux-firmware so they are smaller, but cannot be used with all systems.
-- Images suffixed with -untrusted will ensure that the binary cache, nix-store.earthgman.dev, is disabled at all times.
+- Images suffixed with -with-cache will enable the provided cache: nix-store.earthgman.dev for the installer and the resulting host.
 
 Download the iso corresponding to your use case.
 You can then use `dd` from a shell or a graphical application like rufus or balena-etcher to burn the image to a USB stick.

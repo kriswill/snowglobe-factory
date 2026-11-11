@@ -12,14 +12,14 @@ in
     configDir = ./snowglobe-installer;
   };
 
-  snowglobe-installer-x86_64-untrusted = slib.mkNixosHost {
+  snowglobe-installer-x86_64-with-cache = slib.mkNixosHost {
     hostname = "nixos-installer";
     system = "x86_64-linux";
     configDir = ./snowglobe-installer;
     modules = [
       {
-        substituters."nix-store.earthgman.dev".enable = false;
-        environment.sessionVariables.CACHE_UNTRUSTED = "1";
+        snowglobe-factory.enableCache = true;
+        environment.sessionVariables.SNOWGLOBE_FACTORY_TRUST_CACHE = "1";
       }
     ];
   };
@@ -38,14 +38,14 @@ in
     ];
   };
 
-  snowglobe-installer-x86_64-small-untrusted = slib.mkNixosHost {
+  snowglobe-installer-x86_64-small-with-cache = slib.mkNixosHost {
     hostname = "nixos-installer";
     system = "x86_64-linux";
     configDir = ./snowglobe-installer;
     modules = [
       {
-        substituters."nix-store.earthgman.dev".enable = false;
-        environment.sessionVariables.CACHE_UNTRUSTED = "1";
+        environment.sessionVariables.SNOWGLOBE_FACTORY_TRUST_CACHE = "1";
+        snowglobe-factory.enableCache = true;
         hardware = {
           enableRedistributableFirmware = lib.mkForce false;
           enableAllFirmware = lib.mkForce false;
@@ -75,10 +75,10 @@ in
     specialArgs = { inherit flake; };
   };
 
-	testmonkey-cinnamon = slib.mkNixosHost {
-		hostname = "testmonkey-cinnamon";
-		system = "x86_64-linux";
-		configDir = ./testmonkeys/testmonkey-cinnamon;
-		specialArgs = { inherit flake; };
-		};
+  testmonkey-cinnamon = slib.mkNixosHost {
+    hostname = "testmonkey-cinnamon";
+    system = "x86_64-linux";
+    configDir = ./testmonkeys/testmonkey-cinnamon;
+    specialArgs = { inherit flake; };
+  };
 }
