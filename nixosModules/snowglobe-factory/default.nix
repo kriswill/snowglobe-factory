@@ -6,9 +6,13 @@
 }:
 let
   slib = import ../../lib/functions/module-wrappers { inherit lib; };
+  cfg = config.snowglobe-factory;
 in
 {
-  options.snowglobe-factory.enable = lib.mkEnableOption "snowglobe-factory's default NixOS configuration";
+  options.snowglobe-factory = {
+    enableCache = lib.mkEnableOption "snowglobe-factory's nixos cache.";
+    enable = lib.mkEnableOption "snowglobe-factory's default NixOS configuration";
+  };
 
   config = lib.mkIf config.snowglobe-factory.enable {
     # custom patches and configs
@@ -40,9 +44,8 @@ in
 
     # extra caches
     # use of custom substitutor module. see nixosModules/nixos/substituters.nix;
-    substituters = {
-      # Warning: Personal server for ensuring package patches in overlays/package-patches get cached.
-      # Users have the option to enable or disable this per-host depending on the installer type used.
+    substituters = lib.mkIf cfg.enableCache {
+      # setup the configuration for the provided cache but dont enable it.
       "nix-store.earthgman.dev" = {
         enable = slib.setDefault true;
         publicKey = "nix-store.earthgman.dev:2Qrw9kS+K2c00ikcgaz5Y0M7j5XmkhFJz3d7oNgJdLw=";
