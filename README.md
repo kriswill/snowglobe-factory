@@ -168,7 +168,7 @@ If you have never used NixOS before, the easiest installation method would be to
 https://www.earthgman.dev/assets/snowglobe-installers/
 
 - Images suffixed with -small do not contain firmware blobs from linux-firmware so they are smaller, but cannot be used with all systems.
-- Images suffixed with -untrusted will ensure that the binary cache, nix-store.earthgman.dev, is disabled at all times.
+- Images suffixed with -with-cache will enable the provided cache: nix-store.earthgman.dev for the installer and the resulting host.
 
 Download the iso corresponding to your use case.
 You can then use `dd` from a shell or a graphical application like rufus or balena-etcher to burn the image to a USB stick.
@@ -243,6 +243,7 @@ You may wish to change ownership of this directory to your underprivileged user 
 To do so run `sudo chown -R yourusernamehere:users /etc/nixos`
 
 The generated age private key for sops-nix is located at /root/.config/sops/age/keys.txt. This means that it will still require root privileges to decrypt any secrets stored in secrets.yaml.
+Use: ```sudo sops /etc/nixos/nixosConfigurations/yourhostname/secrets.yaml``` to edit secrets for your host.
 It is recommended that you never allow underprivileged users access to this key, as it can compromise your system.
 Don't forget to create a backup of this key in a secure location!
 

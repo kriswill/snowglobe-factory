@@ -132,7 +132,6 @@ done
 
 cd "$FLAKE_DIR" || _notify "Error" "Could not change working directory to $FLAKE_DIR"
 
-UPDATE_LOG_FILE="$FLAKE_DIR/updates.log"
 FLAKE_DIR_OWNER="$(stat -c '%U' -L "$FLAKE_DIR")"
 WHOAMI="$(whoami)"
 
@@ -147,6 +146,7 @@ WHOAMI="$(whoami)"
 # every time the flake lock updates, commit with git
 _commit_flake_lock() {
 	if git status | grep -q flake.lock; then
+		git reset HEAD -- . # ensure no other files are staged
 		git add flake.lock || _notify "Error" "Failed to add changes to flake.lock to git."
 		git commit -m "update flake.lock" || _notify "Error" "Failed to commit update to flake.lock"
 	fi
@@ -229,6 +229,11 @@ XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}"
 SCRIPT_RUNTIME_DIR="$XDG_RUNTIME_DIR/$SCRIPT_NAME"
 mkdir -p "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to create temporary configuration directory."
 
+# nix will complain of missing files if are not staged in git
+if [ "${GIT_REPO_PRESENT-}" ]; then
+	git add . || _errormsg "Failed to add files to git tree before rebuild."
+fi
+
 case "$1" in
 "switch" | "test" | "boot")
 	cd "$SCRIPT_RUNTIME_DIR" || _notify "Error" "Failed to change the working directory to $SCRIPT_RUNTIME_DIR."
@@ -259,6 +264,12 @@ else
 fi
 
 if [ "${PERSISTENT-}" ]; then
+	if [ -d "$FLAKE_DIR/nixosConfigurations/$TARGET_HOST" ]; then
+		UPDATE_LOG_FILE="$FLAKE_DIR/nixosConfigurations/$TARGET_HOST/updates.log"
+	else
+		UPDATE_LOG_FILE="$FLAKE_DIR/updates.log"
+	fi
+
 	if [ "${GIT_REPO_PRESENT-}" ] && [ ! "${IGNORE_GIT_SYNCHRONIZATION-}" ]; then
 		_commit_flake_lock
 	fi

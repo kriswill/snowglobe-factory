@@ -13,14 +13,6 @@ rec {
       pkgs = final;
       inherit flake;
     }
-    # extra vim plugins not in nixpkgs
-    // {
-      vimPlugins =
-        prev.vimPlugins
-        // import ../packages/vimPlugins {
-          pkgs = final;
-        };
-    }
     # patches for things that dont build or aren't packaged correctly
     // import ./package-patches {
       inherit final prev;

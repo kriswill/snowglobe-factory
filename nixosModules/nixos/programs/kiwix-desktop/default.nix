@@ -6,15 +6,15 @@
 }:
 let
   slib = import ../../../../lib/functions/module-wrappers { inherit lib; };
-  programName = "vlc";
+  programName = "kiwix-desktop";
   cfg = config.programs.${programName};
 in
 {
   options.programs.${programName} = slib.mkProgramOption {
-    description = "popular media player written in qt";
-    programName = programName;
-    packageName = programName;
     inherit pkgs;
+    description = "a program to download information for offline use";
+    programName = programName;
+    packageName = "kiwix";
   };
 
   config = lib.mkIf cfg.enable (
