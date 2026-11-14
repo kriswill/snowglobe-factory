@@ -191,10 +191,11 @@ _install_nixos() {
 		# This password will not be declaratively stored with sops.
 		nixos-install --no-channel-copy --flake "$CONFIG_ROOT#$HOSTNAME" || _install_errormsg "nixos-rebuild"
 	else
-		nixos-install --no-channel-copy --no-root-password --flake "$CONFIG_ROOT#$HOSTNAME" || _install_errormsg "\nnixos-rebuild"
+		nixos-install --no-channel-copy --no-root-password --flake "$CONFIG_ROOT#$HOSTNAME" || _install_errormsg "nixos-rebuild"
 	fi
 
 	y_or_n "Installation completed. Do you wish to reboot now?" && reboot
+	[ -e "/tmp/install_cookie" ] && rm /tmp/install_cookie
 	exit 0
 }
 
@@ -565,6 +566,7 @@ if [ -f "/tmp/install_cookie" ]; then
 	if y_or_n "Detected a failed install. Do you wish to attempt that installation again?"; then
 		nixos-install --no-channel-copy --no-root-password --flake "/mnt/etc/nixos#$(cat /tmp/install_cookie)" || exit 1
 		y_or_n "Installation completed. Do you wish to reboot now?" && reboot
+		rm /tmp/install_cookie
 		exit 0
 	else
 		printf "\nRestarting Installation.\n"
