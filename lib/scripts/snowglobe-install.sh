@@ -186,6 +186,7 @@ _install_nixos() {
 	fi
 
 	printf "Installing NixOS\n"
+	nix flake update --flake "$CONFIG_ROOT" || _install_errormsg "update flake"
 	if [ ! -d "$HOST_CONFIG_DIR/users" ]; then
 		# if no users have been configured, ensure root gets a password
 		# This password will not be declaratively stored with sops.
@@ -765,8 +766,7 @@ User friendly version of suckless dwm featuring lua configuration and live-reloa
 Perfect for enthusists who dislike Wayland adoption."
 
 	LABWC_DESCRIPTION="A very simple and lightweight DIY wayland compositor
-that uses a stacking window layout.
-Ships with the noctalia V5 shell for beginner friendliness."
+that uses stacking window management."
 
 	HYPRLAND_DESCRIPTION="A high-quality, modern DIY wayland window manager.
 Uses a traditional dynamic tiling layout with an emphasis on visual appearance."
