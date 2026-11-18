@@ -766,8 +766,7 @@ User friendly version of suckless dwm featuring lua configuration and live-reloa
 Perfect for enthusists who dislike Wayland adoption."
 
 	LABWC_DESCRIPTION="A very simple and lightweight DIY wayland compositor
-that uses a stacking window layout.
-Ships with the noctalia V5 shell for beginner friendliness."
+that uses stacking window management."
 
 	HYPRLAND_DESCRIPTION="A high-quality, modern DIY wayland window manager.
 Uses a traditional dynamic tiling layout with an emphasis on visual appearance."
