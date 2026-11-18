@@ -105,7 +105,6 @@ in
           dconf-editor.enable = slib.setDefault config.programs.dconf.enable;
           # media player
           vlc.enable = slib.setDefault true;
-          # GTK management app for fonts icons cursors, etc for independent WMs
           pavucontrol.enable = slib.setDefault (
             config.services.pulseaudio.enable && (!config.services.pipewire.enable)
           );
