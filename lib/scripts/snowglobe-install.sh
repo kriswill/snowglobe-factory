@@ -186,6 +186,7 @@ _install_nixos() {
 	fi
 
 	printf "Installing NixOS\n"
+	nix flake update --flake "$CONFIG_ROOT" || _install_errormsg "update flake"
 	if [ ! -d "$HOST_CONFIG_DIR/users" ]; then
 		# if no users have been configured, ensure root gets a password
 		# This password will not be declaratively stored with sops.
