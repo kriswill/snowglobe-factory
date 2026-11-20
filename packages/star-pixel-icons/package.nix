@@ -25,21 +25,16 @@ stdenvNoCC.mkDerivation {
   propagatedBuildInputs = [
     hicolor-icon-theme
     adwaita-icon-theme
-    kdePackages.breeze-icons
-    kdePackages.oxygen-icons
   ];
 
   dontDropIconThemeCache = true;
 
-  dontWrapQtApps = true;
-
   installPhase = ''
     runHook preInstall
 
-    ICON_DIR=$out/share/icons/star-pixel-icons
-    mkdir -p $ICON_DIR
-    cp -r src/SPI/* $ICON_DIR
-    gtk-update-icon-cache $ICON_DIR
+    mkdir -p $out/share/icons/star-pixel-icons
+    cp -r src/SPI/* $out/share/icons/star-pixel-icons
+    gtk-update-icon-cache $out/share/icons/star-pixel-icons
 
     runHook postInstall
   '';
